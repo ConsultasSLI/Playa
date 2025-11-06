@@ -77,6 +77,8 @@
     .pill.ok{background:#e8f7ee;color:#16794f}
     .pill.warn{background:#fff7e6;color:#915930}
     .pill.late{background:#fdeaea;color:#a4132d}
+    .pill.info{background:#eaf1ff;color:#1e40af} /* Programado */
+
   </style>
 </head>
 <body>
@@ -144,13 +146,24 @@
     else if(timer){ clearInterval(timer); timer=null; }
   };
 
-  function pillEstado(estado){
-    const e = (estado||'').toLowerCase();
-    if (e==='en tiempo' || e==='a tiempo') return `<span class="pill ok">En tiempo</span>`;
-    if (e==='ventana') return `<span class="pill warn">Ventana</span>`;
-    if (e==='demorado') return `<span class="pill late">Demorado</span>`;
-    return `<span class="muted">—</span>`;
+function pillEstado(estado){
+  const e = String(estado||'').trim().toLowerCase();
+
+  // Estados actuales
+  if (e === 'programado' || e === 'programada') {
+    return `<span class="pill info">Programado</span>`;
   }
+  if (e === 'demorado' || e === 'demorada') {
+    return `<span class="pill late">Demorado</span>`;
+  }
+
+  // Compatibilidad con los anteriores (por si llegan mezclados)
+  if (e === 'en tiempo' || e === 'a tiempo') return `<span class="pill ok">En tiempo</span>`;
+  if (e === 'ventana') return `<span class="pill warn">Ventana</span>`;
+
+  return `<span class="muted">—</span>`;
+}
+
 
   async function fetchJSONLatest(){
     try{
