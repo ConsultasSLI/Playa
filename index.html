@@ -31,6 +31,10 @@
 
     *{box-sizing:border-box}
     body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;margin:20px;background:var(--bg);color:var(--ink)}
+    /* --- MODO FULLSCREEN (ocultar chrome propio y márgenes) --- */
+    body.is-fs{ margin:0; }
+    body.is-fs .header{ display:none; }
+
     .header{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
     .grow{flex:1}
     .btn{background:var(--btn);border:0;color:var(--btn-ink);border-radius:14px;padding:14px 18px;font-weight:900;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.15);font-size:18px}
@@ -117,19 +121,16 @@
     .chip .sep{ opacity:.7 }
 
     /* Pastilla del evento más grande */
-.chip .line2 .stage-pill{
-  display:inline-flex;
-  align-items:center;
-  padding:10px 14px;
-  border-radius:16px;
-  border: 2px solid rgba(0,0,0,.18);
-
-  /* 👉 toma las variables y si faltan usa valores por defecto */
-  background-color: var(--stage-bg, #06b6d4) !important;
-  color:           var(--stage-ink, #05202a) !important;
-
-  animation: blinkSync 1.25s ease-in-out infinite;
-}
+    .chip .line2 .stage-pill{
+      display:inline-flex;
+      align-items:center;
+      padding:10px 14px;
+      border-radius:16px;
+      border: 2px solid rgba(0,0,0,.18);
+      background-color: var(--stage-bg, #06b6d4) !important;
+      color:           var(--stage-ink, #05202a) !important;
+      animation: blinkSync 1.25s ease-in-out infinite;
+    }
 
     /* Cronómetro del globo un poco más grande */
     .ago-badge{
@@ -208,7 +209,9 @@
     <div class="grow"></div>
     <button id="btn" class="btn">Actualizar</button>
     <button id="toggleTheme" class="btn" title="Alternar tema">Tema</button>
-   <label><input type="checkbox" id="auto" checked> Auto-refresh 60s</label>
+    <label><input type="checkbox" id="auto" checked> Auto-refresh 60s</label>
+    <!-- NUEVO: Botón pantalla completa -->
+    <button id="btnFS" class="btn" title="Pantalla completa">Pantalla completa</button>
   </div>
 
   <div class="main-grid">
@@ -290,6 +293,60 @@
     localStorage.setItem('themeLight', light ? '1' : '0');
   };
 
+  /* ==================== FULLSCREEN ==================== */
+  const btnFS = document.getElementById('btnFS');
+
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  }
+
+  async function enterFS(){
+    const el = document.documentElement;
+    try{
+      if (el.requestFullscreen)      await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen(); // Safari / Tizen
+      else if (el.msRequestFullscreen)     await el.msRequestFullscreen();     // IE/Edge legacy
+    }catch(e){ console.log('FS error', e); }
+  }
+
+  async function exitFS(){
+    try{
+      if (document.exitFullscreen)      await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+      else if (document.msExitFullscreen)     await document.msExitFullscreen();
+    }catch(e){ console.log('FS exit error', e); }
+  }
+
+  function updateFSUI(){
+    const fs = isFullscreen();
+    document.body.classList.toggle('is-fs', fs);
+    if (btnFS){
+      btnFS.textContent = fs ? 'Salir de pantalla completa' : 'Pantalla completa';
+      btnFS.title = btnFS.textContent;
+    }
+  }
+
+  btnFS?.addEventListener('click', ()=>{
+    if (isFullscreen()) exitFS(); else enterFS();
+  });
+
+  // Enter (OK en control remoto) para entrar a FS; Escape/Back para salir
+  document.addEventListener('keydown', (e)=>{
+    const k = e.key;
+    if (!isFullscreen() && (k === 'Enter' || k === 'Accept')) {
+      enterFS();
+    } else if (isFullscreen() && (k === 'Escape' || k === 'Backspace')) {
+      exitFS();
+    }
+  });
+
+  // Cambios de estado fullscreen (cubre Tizen/Safari)
+  ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(ev=>{
+    document.addEventListener(ev, updateFSUI);
+  });
+
+  /* ================== FIN FULLSCREEN ================== */
+
   let clockTimer = null;
   function startClockPlanta(){
     if (clockTimer){ clearInterval(clockTimer); }
@@ -312,12 +369,13 @@
     if(e.target.checked){ timer=setInterval(loadData,60000); loadData(); }
     else if(timer){ clearInterval(timer); timer=null; }
   };
-(function initAutoRefresh(){
-  const chk = document.getElementById('auto');
-  if (chk && chk.checked){
-    timer = setInterval(loadData, 60000);
-  }
-})();
+  (function initAutoRefresh(){
+    const chk = document.getElementById('auto');
+    if (chk && chk.checked){
+      timer = setInterval(loadData, 60000);
+    }
+  })();
+
   async function fetchJSONLatest(){
     try{
       const r = await fetch(JSON_URL,{cache:'no-store'});
@@ -643,6 +701,7 @@
       const h3 = badge.closest('h3');
       if (h3) h3.classList.add('h3-planta');
     }
+    updateFSUI(); // sincroniza estado inicial del botón
   });
 
   (function initTheme(){
