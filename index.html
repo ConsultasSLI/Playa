@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Playa & Cargas</title>
+  <title>Rotador Playa & Cargas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     html, body{
@@ -61,15 +61,17 @@
       padding:10px 18px;
       border-radius:999px;
       border:none;
-      background:rgba(15,23,42,.9);
-      color:#e5e7eb;
+      background:#ef4444;   /* 🔴 rojo */
+      color:#ffecec;
       font-weight:700;
       cursor:pointer;
       font-size:14px;
       box-shadow:0 4px 12px rgba(0,0,0,.5);
       white-space:nowrap;
     }
-    .next-btn:active{transform:translate(-50%,1px);}
+    .next-btn:active{
+      transform:translate(-50%,1px);
+    }
   </style>
 </head>
 <body>
@@ -123,24 +125,24 @@
     });
 
     // ===== Pantalla completa a nivel rotador =====
-    // (Dejé estos eventos como los tenías; asumen que ya tenés definidas
-    // las funciones isFullscreen(), enterFS(), exitFS(), updateFSUI() en otro script)
-
+    // (Dejé esto como estaba; si tenés isFullscreen/enterFS/exitFS definidos en otro lado va a andar)
     document.addEventListener('keydown', (e)=>{
       const k = e.key;
-      if (!isFullscreen && (k === 'Enter' || k === 'Accept')) {
-        enterFS();
-      } else if (isFullscreen && (k === 'Escape' || k === 'Backspace')) {
-        exitFS();
+      if (typeof isFullscreen === 'function' &&
+          typeof enterFS === 'function' &&
+          typeof exitFS === 'function') {
+        if (!isFullscreen() && (k === 'Enter' || k === 'Accept')) {
+          enterFS();
+        } else if (isFullscreen() && (k === 'Escape' || k === 'Backspace')) {
+          exitFS();
+        }
       }
     });
 
-    ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(ev=>{
-      document.addEventListener(ev, updateFSUI);
-    });
-
-    // Estado inicial del texto del botón de FS (si lo usás)
     if (typeof updateFSUI === 'function') {
+      ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(ev=>{
+        document.addEventListener(ev, updateFSUI);
+      });
       updateFSUI();
     }
   </script>
