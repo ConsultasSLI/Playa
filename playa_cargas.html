@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Playa & Cargas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        /* Dark por defecto */
+        --bg: #0f172a;
+        --ink: #e5e7eb;
+        --muted: #9aa5b1;
+        --card: #0b1220;
+        --card-b: #2b3647;
+        --chip: #142031;
+
+        --rowb: #3b4758;
+        --thead-bg: #132137;
+        --thead-b: #6b7280;
+        --btn: #1d4ed8;
+        --btn-ink: #e5e7eb;
+        --badge-bg: #1c2a40;
+        --badge-ink: #d1d5db;
+
+        --tbl-font: 22px;
+        --h3-font: 30px;
+        --badge-font: 18px;
+        --thick: 4px;
+
+        /* Colores de ETAPA (Asignación / Inicio / Fin) */
+        --stage1-bg: #f59e0b;
+        --stage1-ink: #111827; /* Asignación */
+        --stage2-bg: #06b6d4;
+        --stage2-ink: #05202a; /* Inicio */
+        --stage3-bg: #8b5cf6;
+        --stage3-ink: #0c0520; /* Fin   */
+      }
+      .light {
+        --bg: #eef3f8;
+        --ink: #0b1220;
+        --muted: #4b5563;
+        --card: #ffffff;
+        --card-b: #8a97ab;
+        --chip: #e7eef7;
+        --rowb: #5c6777;
+        --thead-bg: #e5edf7;
+        --thead-b: #334155;
+        --btn: #0ea5e9;
+        --btn-ink: #ffffff;
+        --badge-bg: #e7eef7;
+        --badge-ink: #111827;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+        margin: 20px; background: var(--bg); color: var(--ink);
+      }
+      .header { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+      .grow { flex: 1; }
+      .btn {
+        background: var(--btn); border: 0; color: var(--btn-ink);
+        border-radius: 14px; padding: 14px 18px; font-weight: 900;
+        cursor: pointer; box-shadow: 0 2px 0 rgba(0,0,0,.15); font-size: 18px;
+      }
+      .btn:disabled { opacity: .5; cursor: not-allowed; }
+      label { font-size: 18px; }
+      .muted { color: var(--muted); }
+
+      .card {
+        background: var(--card);
+        border: var(--thick) solid var(--card-b);
+        border-radius: 18px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
+      }
+      .card h3 {
+        margin: 0; padding: 18px 20px; border-bottom: var(--thick) solid var(--thead-b);
+        font-size: var(--h3-font); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      }
+      .h3-count {
+        font-size: var(--badge-font); font-weight: 900; background: var(--badge-bg);
+        color: var(--badge-ink); border-radius: 999px; padding: 6px 12px; border: 3px solid var(--rowb);
+      }
+      .card .body { padding: 16px 18px; }
+
+      .table-wrap { overflow-x: auto; }
+      table {
+        width: 100%;
+        border-collapse: separate; border-spacing: 0;
+        font-size: var(--tbl-font);
+        min-width: 1400px;
+      }
+      th, td {
+        padding: 16px 14px; border-bottom: var(--thick) solid var(--rowb);
+        text-align: left; white-space: nowrap;
+      }
+      th {
+        background: var(--thead-bg); font-weight: 1000; color: var(--ink);
+        border-bottom: calc(var(--thick) + 1px) solid var(--thead-b);
+        position: sticky; top: 0; z-index: 1;
+      }
+      /* Centrados para horarios y duraciones */
+      th.t-time, td.t-time { text-align: center; }
+
+      .main-grid {
+        display: grid; grid-template-areas: "table planta";
+        grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;
+      }
+      .card-left  { grid-area: table; }
+      .card-right { grid-area: planta; }
+
+      @media (max-width: 900px) {
+        .main-grid { grid-template-areas: "planta" "table"; grid-template-columns: 1fr; }
+        :root { --tbl-font: 18px; }
+      }
+
+      /* Panel único de En Planta: UNA sola columna */
+      .planta-panel { background: var(--card); border: var(--thick) solid var(--card-b); border-radius: 16px; }
+      .planta-panel h4 {
+        margin: 0; padding: 14px 16px; border-bottom: var(--thick) solid var(--thead-b);
+        font-size: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      }
+      .badge { font-size: 20px; background: var(--badge-bg); color: var(--badge-ink); border-radius: 999px; padding: 6px 12px; font-weight: 1000; border: 3px solid var(--rowb); }
+
+      .planta-block { padding: 14px 16px; }
+      .counts-line { font-size: 22px; font-weight: 1000; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+      .counts-line .dot { opacity: .5 }
+
+      .chips-wrap { padding-top: 8px; }
+      .darsenas-title { margin-top: 10px; font-weight: 900; opacity: .9; }
+
+      /* Lista vertical única */
+      .darsenas-list { margin-top: 8px; }
+      .darsenas-list .list { padding: 10px 0; }
+
+      /* CHIP */
+      .chip{
+        display:flex;flex-direction:column;align-items:flex-start;background:var(--chip);border-radius:20px;
+        padding:22px 26px;font-size:clamp(22px,2.1vw,30px);margin:12px 0;gap:10px;border:var(--thick) solid #00000022
+      }
+      .chip .line0{ display:flex; gap:8px; align-items:center; font-weight:1000; }
+      .chip .line1{ display:flex; gap:8px; align-items:center; font-weight:1000; }
+      .chip .line2{ opacity:.98; font-weight:900; font-size:clamp(18px,1.8vw,22px); }
+      .chip .sep{ opacity:.7 }
+
+      .chip .line2 .stage-pill{
+        display:inline-flex; align-items:center; padding:10px 14px; border-radius:16px;
+        border: 2px solid rgba(0,0,0,.18);
+        background-color: var(--stage-bg, #06b6d4) !important;
+        color: var(--stage-ink, #05202a) !important;
+        animation: blinkSync 1.25s ease-in-out infinite;
+      }
+
+      .ago-badge{
+        display:inline-flex; align-items:center; padding:8px 12px; border-radius:14px; margin-left:.6ch;
+        font-variant-numeric: tabular-nums; font-family: ui-monospace, Menlo, Consolas, "Courier New", monospace;
+        background: rgba(255,255,255,.12); color: var(--ink); border: 1px solid rgba(0,0,0,.25);
+        font-size: clamp(14px, 1.5vw, 20px);
+      }
+      .ago-badge.overdue{ background:#ef4444 !important; color:#ffffff !important; border-color:#7f1d1d !important; }
+
+      /* SLA: duración que supera el límite configurado */
+      .sla-over{
+        color:#ef4444;
+        font-weight:1000;
+      }
+
+      tr.dock-row td{ background:var(--dock-bg) !important; color:var(--dock-ink) !important; border-color:rgba(0,0,0,.22); }
+      tr.dock-row td.stage-situ{
+        background:var(--stage-bg) !important; color:var(--stage-ink) !important;
+        border-color:rgba(255,255,255,.25) !important; animation: blinkSync 1.25s ease-in-out infinite;
+      }
+
+      td.td-situ{font-weight:1000;text-align:center;border:var(--thick) solid var(--rowb);border-radius:12px}
+      td.situ-ok   {background:#22c55e;color:#06140b;border-color:#14532d}
+      td.situ-late {background:#ef4444;color:#3b0a0a;border-color:#7f1d1d}
+      td.situ-info {background:#60a5fa;color:#0b214a;border-color:#1e40af}
+      td.situ-neut {background:#cbd5e1;color:#0b1220;border-color:#64748b}
+            /* Variantes MÁS CLARAS solo para filas de SALIDAS */
+      tr.row-salida td.situ-ok{
+        background:#bbf7d0;   /* verde bien clarito */
+        color:#000000;
+        border-color:#93e2b0;
+      }
+      tr.row-salida td.situ-late{
+        background:#fecaca;   /* rojo clarito */
+        color:#000000;
+        border-color:#e07979;
+      }
+
+
+      @keyframes blinkSync {
+        0%,100% { filter: brightness(0.96); box-shadow: 0 0 0 rgba(255,255,255,0); }
+        50%     { filter: brightness(1.22); box-shadow: 0 0 12px rgba(255,255,255,0.18); }
+      }
+
+      .h3-planta{ font-size: clamp(36px, 3.8vw, 64px); gap: 16px; }
+      #countPlanta{ font-size: clamp(28px, 3.2vw, 48px); padding: 10px 16px; border-width: 4px; }
+   
+      .card > h3.h3-planta .h3-count#countPlanta{ font-size: clamp(30px, 3.4vw, 52px) !important; padding: 12px 18px; border-width: 4px; }
+
+      .last-mini{ font-size: clamp(14px, 1.4vw, 20px); color: var(--muted); font-weight: 700; margin-left: 8px; white-space: nowrap; align-self: center; }
+      .card > h3.h3-planta .clock-big{
+        font-size: clamp(48px, 5.5vw, 96px) !important; font-weight: 1000; letter-spacing: .5px; margin-left: auto;
+        line-height: .95; font-variant-numeric: tabular-nums;
+        text-shadow: 0 2px 0 rgba(0,0,0,.25), 0 4px 12px rgba(0,0,0,.25);
+      }
+      .light .clock-big{ text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.35); }
+
+      /* === Compacto para el header En planta === */
+      .card > h3.h3-planta{
+        font-size: clamp(34px, 3.6vw, 56px) !important;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+      .card > h3.h3-planta .h3-count#countPlanta{
+        font-size: clamp(26px, 3.0vw, 44px) !important;
+        padding: 8px 14px;
+        border-width: 3px;
+      }
+      .card > h3.h3-planta .clock-big{
+        font-size: clamp(40px, 4.6vw, 80px) !important;
+        letter-spacing: .3px;
+      }
+      .card > h3.h3-planta .last-mini{
+        font-size: clamp(12px, 1.1vw, 16px);
+        margin-left: 6px;
+      }
+      /* === Encabezado grande para la tabla izquierda === */
+      .card-left > h3{
+        font-size: clamp(28px, 2.6vw, 44px);
+        gap: 14px;
+        padding: 16px 20px;
+        line-height: 1.15;
+      }
+      .card-left > h3 .h3-count{
+        font-size: clamp(20px, 2.2vw, 34px);
+        padding: 8px 14px;
+        border-width: 4px;
+      }
+      .card-left > h3 .last-mini{
+        font-size: clamp(13px, 1.4vw, 18px);
+        margin-left: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <div class="header">
+      <h2 style="margin: 0; font-size: 34px">Playa & Cargas</h2>
+      <div id="last" class="muted" style="display: none">Actualizando…</div>
+      <div class="grow"></div>
+      <button id="btn" class="btn">Actualizar</button>
+      <button id="toggleTheme" class="btn" title="Alternar tema">Tema</button>
+      <label><input type="checkbox" id="auto" checked /> Auto-refresh 60s</label>
+       <button id="btnFS" class="btn" title="Pantalla completa">Pantalla completa</button>
+    </div>
+
+    <div class="main-grid">
+      <!-- IZQUIERDA: Tabla única -->
+      <div class="card card-left">
+        <h3>
+          Ingresos esperados <span id="countIng" class="h3-count">0</span>, En
+          planta <span id="countPlantaMini" class="h3-count">0</span> y salidas
+          confirmadas <span id="countSal" class="h3-count">0</span>
+          <span id="lastMini" class="last-mini">Actualizando…</span>
+        </h3>
+        <div class="body table-wrap">
+          <table id="tblMix">
+            <thead>
+              <tr>
+                <th>HR</th>
+                <th>Patente</th>
+                <th class="t-time">Hora</th>
+                <th>Estado</th>
+                <th>Vuelta</th>
+
+                <th>Equipo</th>
+                <th>Zona</th>
+                <th>Transporte</th>
+                <th>Situación</th>
+                <th class="t-time">Ingreso</th>
+                <th class="t-time">Tiempo Presentado</th>
+                <th class="t-time">Tiempo Asignación</th>
+                <th class="t-time">Tiempo Carga</th>
+                <th class="t-time">Tiempo Predio</th>
+                <th class="t-time">Salida</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- DERECHA: En planta (UNA columna, todos los chips hacia abajo) -->
+      <div class="card card-right">
+        <h3 class="h3-planta">
+          En planta <span id="countPlanta" class="h3-count">0</span>
+          <span id="clockPlanta" class="clock-big">00:00:00</span>
+        </h3>
+        <div class="body">
+          <div id="plantaPanel" class="planta-panel">
+            <h4>Resumen & Dársenas</h4>
+            <div class="planta-block">
+              <div id="countsLine" class="counts-line">
+                PRESENTADO <span class="badge">0</span>
+                <span class="dot">·</span>
+                PLAYA <span class="badge">0</span>
+                <span class="dot">·</span>
+                PLAY2 <span class="badge">0</span>
+              </div>
+
+              <!-- Chips de PRESENTADO/PLAYA/PLAY2 -->
+              <div class="chips-wrap" id="chipsCombo"><div class="muted">—</div></div>
+
+              <!-- Lista única vertical de dársenas (sin títulos) -->
+              <div class="darsenas-title">DÁRSENAS</div>
+              <div class="darsenas-list">
+                <div class="list" id="darsCol"><div class="muted">—</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const JSON_URL =
+        "https://script.google.com/macros/s/AKfycbwW8_C7xDTOGiqda99_b5vM8lEV4WwqX78DUvx3pFG26kZ9N3_d5agZ1TbJXtUD2zcQ/exec";
+
+      const DOCK_COLORS = {
+        PRESENTADO: { bg: "#2a4365", ink: "#e6f0ff" },
+        PLAYA: { bg: "#1f5e3b", ink: "#e7ffe9" },
+        PLAY2: { bg: "#3b2f6b", ink: "#efe8ff" },
+        DOCK1: { bg: "#6b2f2f", ink: "#ffecec" },
+        DOCK2: { bg: "#6b4f1f", ink: "#fff2dc" },
+        DOCK3: { bg: "#265d5d", ink: "#e8ffff" },
+        ALERO: { bg: "#5a315d", ink: "#ffe9ff" },
+        CARPA: { bg: "#27472f", ink: "#e9ffe9" },
+      };
+      const DEFAULT_DOCK = { bg: "#243b53", ink: "#e8f0ff" };
+      function getDockColor(name) {
+        return DOCK_COLORS[String(name || "").toUpperCase()] || DEFAULT_DOCK;
+      }
+
+      function getCSS(v) {
+        return getComputedStyle(document.documentElement)
+          .getPropertyValue(v)
+          .trim();
+      }
+      const STAGE_STYLE = {
+        1: { bg: getCSS("--stage1-bg"), ink: getCSS("--stage1-ink") },
+        2: { bg: getCSS("--stage2-bg"), ink: getCSS("--stage2-ink") },
+        3: { bg: getCSS("--stage3-bg"), ink: getCSS("--stage3-ink") },
+      };
+
+      // ===== SLA por tipo de equipo y etapa (segundos) =====
+      const SLA_CONFIG = {
+        // por defecto (si el equipo no tiene override)
+        defaults: {
+          ASIGNACION: 20 * 60, // 20 minutos Asignación → Inicio
+          CARGA:      40 * 60  // 40 minutos Inicio → Fin
+        },
+        // overrides por equipo (ajustá a gusto)
+        byEquipo: {
+          "SEMI":       { ASIGNACION: 20 * 60, CARGA: 45 * 60 },
+          "SEMI DOBLE": { ASIGNACION: 25 * 60, CARGA: 50 * 60 },
+          "4TN":        { ASIGNACION: 15 * 60, CARGA: 30 * 60 },
+          "8TN":        { ASIGNACION: 20 * 60, CARGA: 35 * 60 }
+          // agregá aquí otros equipos: "14TN", "ACOPLADO", etc.
+        }
+      };
+      function getSlaSeconds(eventKey, equipo) {
+        if (!eventKey) return null;
+        const ek = String(eventKey).toUpperCase(); // 'ASIGNACION' / 'CARGA'
+        const eq = String(equipo || "").toUpperCase();
+        const byEq = SLA_CONFIG.byEquipo[eq] || {};
+        const val = byEq[ek] !== undefined ? byEq[ek] : SLA_CONFIG.defaults[ek];
+        return typeof val === "number" && val > 0 ? val : null;
+      }
+
+      let timer = null;
+      document.getElementById("btn").onclick = loadData;
+      document.getElementById("toggleTheme").onclick = () => {
+        const light = document.body.classList.toggle("light");
+        localStorage.setItem("themeLight", light ? "1" : "0");
+      };
+
+      let clockTimer = null;
+      function startClockPlanta() {
+        if (clockTimer) clearInterval(clockTimer);
+        const el = document.getElementById("clockPlanta");
+        if (!el) return;
+        const tz = "America/Argentina/Buenos_Aires";
+        const opts = { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: tz };
+        const tick = () => {
+          try { el.textContent = new Date().toLocaleTimeString("es-AR", opts); }
+          catch (_) {
+            const now = new Date(), pad = (n)=>String(n).padStart(2,"0");
+            el.textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+          }
+        };
+        tick();
+        clockTimer = setInterval(tick, 1000);
+      }
+
+      document.getElementById("auto").onchange = (e) => {
+        if (e.target.checked) { timer = setInterval(loadData, 60000); loadData(); }
+        else if (timer) { clearInterval(timer); timer = null; }
+      };
+      (function initAutoRefresh() {
+        const chk = document.getElementById("auto");
+        if (chk && chk.checked) { timer = setInterval(loadData, 60000); }
+      })();
+
+      async function fetchJSONLatest() {
+        try {
+          const r = await fetch(JSON_URL, { cache: "no-store" });
+          return await r.json();
+        } catch (_) {
+          return new Promise((resolve, reject) => {
+            const cb = "cb_" + Date.now();
+            window[cb] = (d) => { resolve(d); cleanup(); };
+            const s = document.createElement("script");
+            s.src = JSON_URL + (JSON_URL.includes("?") ? "&" : "?") + "callback=" + cb + "&_=" + Date.now();
+            s.onerror = (e) => { cleanup(); reject(e); };
+            document.body.appendChild(s);
+            function cleanup() { delete window[cb]; s.remove(); }
+          });
+        }
+      }
+ /* ==================== FULLSCREEN ==================== */
+  const btnFS = document.getElementById('btnFS');
+
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+  }
+
+  async function enterFS(){
+    const el = document.documentElement;
+    try{
+      if (el.requestFullscreen)      await el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) await el.webkitRequestFullscreen(); // Safari / Tizen
+      else if (el.msRequestFullscreen)     await el.msRequestFullscreen();     // IE/Edge legacy
+    }catch(e){ console.log('FS error', e); }
+  }
+
+  async function exitFS(){
+    try{
+      if (document.exitFullscreen)      await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
+      else if (document.msExitFullscreen)     await document.msExitFullscreen();
+    }catch(e){ console.log('FS exit error', e); }
+  }
+
+  function updateFSUI(){
+    const fs = isFullscreen();
+    document.body.classList.toggle('is-fs', fs);
+    if (btnFS){
+      btnFS.textContent = fs ? 'Salir de pantalla completa' : 'Pantalla completa';
+      btnFS.title = btnFS.textContent;
+    }
+  }
+
+  btnFS?.addEventListener('click', ()=>{
+    if (isFullscreen()) exitFS(); else enterFS();
+  });
+
+  // Enter (OK en control remoto) para entrar a FS; Escape/Back para salir
+  document.addEventListener('keydown', (e)=>{
+    const k = e.key;
+    if (!isFullscreen() && (k === 'Enter' || k === 'Accept')) {
+      enterFS();
+    } else if (isFullscreen() && (k === 'Escape' || k === 'Backspace')) {
+      exitFS();
+    }
+  });
+
+  // Cambios de estado fullscreen (cubre Tizen/Safari)
+  ['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(ev=>{
+    document.addEventListener(ev, updateFSUI);
+  });
+
+  /* ================== FIN FULLSCREEN ================== */
+      async function loadData() {
+        const btn = document.getElementById("btn");
+        btn.disabled = true;
+        try {
+          const data = await fetchJSONLatest();
+          if (!data || data.ok === false) throw new Error((data && data.error) || "Sin datos");
+          renderAll(data);
+        } catch (e) {
+          console.error(e);
+          document.getElementById("last").textContent = "Error al cargar";
+          document.getElementById("lastMini").textContent = "Error al cargar";
+          ["countIng","countSal","countPlanta","countPlantaMini"].forEach(id => document.getElementById(id).textContent = "0");
+          document.querySelector("#tblMix tbody").innerHTML = "";
+          // limpiar panel
+          document.getElementById("chipsCombo").innerHTML = '<div class="muted">—</div>';
+          document.getElementById("darsCol").innerHTML = '<div class="muted">—</div>';
+          document.getElementById("countsLine").innerHTML = `
+            PRESENTADO <span class="badge">0</span> <span class="dot">·</span>
+            PLAYA <span class="badge">0</span> <span class="dot">·</span>
+            PLAY2 <span class="badge">0</span>`;
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      function renderAll(data) {
+        const meta = data.meta || {};
+        const ts = meta.ts_ba || meta.ts_utc || "";
+        document.getElementById("last").textContent = `Actualizado: ${ts}`;
+        document.getElementById("lastMini").textContent = `Actualizado: ${ts}`;
+        renderPlanta(data);
+        renderTablaUnica(data);
+      }
+
+      function situClassByEstado(estado) {
+        const e = String(estado || "").trim().toLowerCase();
+        if (e === "a tiempo" || e === "en tiempo") return "situ-ok";
+        if (e === "demorado" || e === "demorada") return "situ-late";
+        if (e === "programado" || e === "programada") return "situ-info";
+        if (e === "despachado" || e === "despachada") return "situ-ok";
+        return "situ-neut";
+      }
+
+      function normEventName(s) {
+        return String(s || "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toUpperCase();
+      }
+      function stageFromEvent(evName) {
+        const e = normEventName(evName);
+        if (e.includes("FIN") && e.includes("CARGA")) return 3;
+        if (e.includes("INICIO") && e.includes("CARGA")) return 2;
+        if (e.includes("ASIGNACION") && e.includes("CARGA")) return 1;
+        return 0;
+      }
+
+      function buildEventTimes(movs) {
+        // { hr: { presentado, asignacion, inicio, fin, salida } } en HH:MM
+        const idx = {};
+        for (const m of movs || []) {
+          const hr = String(m.hr || "").trim(); if (!hr) continue;
+          const name = normEventName(m.darsena || "");
+          const t = String(m.fecha || "");       // 'HH:MM'
+          const sc = hmToInt(t); if (sc < 0) continue;
+          if (!idx[hr]) idx[hr] = {};
+          const setIfMax = (key) => { if (!idx[hr][key] || sc >= hmToInt(idx[hr][key])) idx[hr][key] = t; };
+          if (name.includes("PRESENTADO"))       setIfMax("presentado");
+          else if (name.includes("ASIGNACION"))  setIfMax("asignacion");
+          else if (name.includes("INICIO"))      setIfMax("inicio");
+          else if (name.includes("FIN"))         setIfMax("fin");
+          else if (name.includes("SALIDA"))      setIfMax("salida");
+          else if (name === "PRESENTADO")        setIfMax("presentado");
+          else if (name === "SALIDA")            setIfMax("salida");
+        }
+        return idx;
+      }
+      function buildEventIndex(movs, allowed) {
+        const allow = new Set((allowed || []).map((s) => String(s).toUpperCase()));
+        const idx = {};
+        for (const m of movs) {
+          const hr = String(m.hr || "").trim(); if (!hr) continue;
+          const ev = String(m.darsena || "").trim().toUpperCase();
+          if (allow.size && !allow.has(ev)) continue;
+          const t = String(m.fecha || "");
+          const prev = idx[hr] && idx[hr][ev];
+          if (!idx[hr]) idx[hr] = {};
+          if (!prev || hmToInt(t) >= hmToInt(prev)) idx[hr][ev] = t;
+        }
+        return idx;
+      }
+      function buildLastEventPlanta(movs) {
+        const idx = {};
+        for (const m of movs) {
+          const hr = String(m.hr || "").trim(); if (!hr) continue;
+          const evName = String(m.darsena || "").trim();
+          const t = String(m.fecha || "");
+          const prevT = idx[hr] && idx[hr]._t;
+          if (!idx[hr] || hmToInt(t) >= hmToInt(prevT)) idx[hr] = { name: evName, time: t, _t: t };
+        }
+        const out = {};
+        Object.keys(idx).forEach(hr => out[hr] = { name: idx[hr].name || "—", time: idx[hr].time || "" });
+        return out;
+      }
+
+      /* ===== Helper de duración con SLA (corte por salida si existe) ===== */
+      function durationCell(startHHMM, endHHMM, liveZoneLabel, hardStopHHMM, slaKey, equipo) {
+        const slaSec = getSlaSeconds(slaKey, equipo);
+
+        // Caso 1: tenemos inicio y fin (o fin "duro")
+        if (startHHMM && (endHHMM || hardStopHHMM)) {
+          const effectiveEnd = endHHMM || hardStopHHMM;
+          const diffSec = hmDiff(startHHMM, effectiveEnd);
+          const over = slaSec != null && diffSec >= slaSec;
+          const cls = over ? "sla-over" : "";
+          return `<span class="${cls}" data-sla="${slaSec || ""}" data-sec="${diffSec}">
+            ${fmtDuration(diffSec)}
+          </span>`;
+        }
+
+        // Caso 2: solo inicio, sin fin/stop → contador en vivo
+        if (startHHMM && !endHHMM && !hardStopHHMM) {
+          const startEpoch = hhmmToEpoch(startHHMM);
+          const attrs = [];
+          attrs.push(`data-start="${startEpoch}"`);
+          if (slaSec != null) attrs.push(`data-sla="${slaSec}"`);
+          if (liveZoneLabel) attrs.push(`data-zone="${liveZoneLabel}"`);
+          return `<span class="ago-badge live-sla" ${attrs.join(" ")}>00:00:00</span>`;
+        }
+
+        // Sin datos
+        return "—";
+      }
+
+      /* ================ TABLA ÚNICA ================ */
+      function renderTablaUnica(data) {
+        const ing = Array.isArray(data.ingresos_esperados) ? data.ingresos_esperados : [];
+        const sal = (Array.isArray(data.salidas_rows) ? data.salidas_rows : []).filter(r => String(r.hr || "").trim());
+        const plantaRows = Array.isArray(data.en_planta_rows) ? data.en_planta_rows : [];
+
+        const movsIng = Array.isArray(data.ingresos_movs) ? data.ingresos_movs : [];
+        const movsSal = Array.isArray(data.salidas_movs) ? data.salidas_movs : [];
+        const movsPlt = Array.isArray(data.en_planta_movs) ? data.en_planta_movs : [];
+        const allMovs = [].concat(movsIng, movsSal, movsPlt);
+
+        const evIdx   = buildEventIndex([].concat(movsIng, movsSal, movsPlt), ["PRESENTADO", "SALIDA"]);
+        const lastPl  = buildLastEventPlanta(movsPlt);
+        const evTimes = buildEventTimes(allMovs);
+
+        document.getElementById("countIng").textContent = ing.length;
+        document.getElementById("countSal").textContent = sal.length;
+        document.getElementById("countPlantaMini").textContent = plantaRows.length;
+
+        const rowsHTML = [];
+
+        /* ---------- Ingresos esperados ---------- */
+        for (const r of ing) {
+          const hr        = String(r.hr || "").trim();
+          const hora      = r.horariocarga || r.turno || "";
+          const ingreso   = evIdx[hr]?.["PRESENTADO"] || "";
+          const salida    = evIdx[hr]?.["SALIDA"] || "";
+          const transp    = r.empresa || r.transporte || "";
+          const situTxt   = r.estado || "";
+          const situCls   = situClassByEstado(situTxt);
+
+          const t         = evTimes[hr] || {};
+          const presentado= t.presentado || "";
+          const asign     = t.asignacion || "";
+          const inicio    = t.inicio || "";
+          const fin       = t.fin    || "";
+          const eq        = r.tipo_equipo || "";
+
+          rowsHTML.push(`<tr>
+            <td>${r.hr||""}</td><td>${r.patente||""}</td><td class="t-time">${hora}</td><td><b>${r.estado||""}</b></td>
+            <td>${r.vuelta||""}</td><td>${r.tipo_equipo||""}</td><td>${r.tipo_zona||""}</td>
+            <td>${transp}</td>
+            <td class="td-situ ${situCls}">${situTxt||"—"}</td>
+            <td class="t-time">${ingreso}</td>
+            <td class="t-time">${durationCell(presentado, asign,  "PRES→ASIG", salida, null,          eq)}</td>
+            <td class="t-time">${durationCell(asign,      inicio, "ASIG→INIC", salida, "ASIGNACION",  eq)}</td>
+            <td class="t-time">${durationCell(inicio,     fin,    "INIC→FIN",  salida, "CARGA",       eq)}</td>
+            <td class="t-time">${durationCell(presentado, salida, "ING→SAL",   salida, null,          eq)}</td>
+            <td class="t-time">${salida}</td>
+          </tr>`);
+        }
+
+        /* ---------- En planta ---------- */
+        for (const r of plantaRows) {
+          const hr        = String(r.hr || "").trim();
+          const hora      = r.horariocarga || r.turno || "";
+          const ingreso   = evIdx[hr]?.["PRESENTADO"] || "";
+          const salida    = evIdx[hr]?.["SALIDA"] || "";
+          const dock      = (r.darsenaActual || "").toString().toUpperCase();
+          const transp    = r.empresa || r.transporte || "";
+          const last      = lastPl[hr] || { name: "—", time: "" };
+          const stage     = stageFromEvent(last.name);
+          const col       = getDockColor(dock);
+
+          const t         = evTimes[hr] || {};
+          const presentado= t.presentado || "";
+          const asign     = t.asignacion || "";
+          const inicio    = t.inicio || "";
+          const fin       = t.fin    || "";
+          const eq        = r.tipo_equipo || "";
+
+          const d1 = durationCell(presentado, asign,  "PRES→ASIG", salida, null,         eq);
+          const d2 = durationCell(asign,      inicio, "ASIG→INIC", salida, "ASIGNACION", eq);
+          const d3 = durationCell(inicio,     fin,    "INIC→FIN",  salida, "CARGA",      eq);
+          const d4 = durationCell(presentado, salida, "ING→SAL",   salida, null,         eq);
+
+          const rowClass = stage > 0 ? "stage-situ" : "situ-neut";
+          const st = stage > 0 ? STAGE_STYLE[stage] : null;
+
+          rowsHTML.push(`<tr class="dock-row" style="--dock-bg:${col.bg};--dock-ink:${col.ink}">
+            <td>${r.hr||""}</td><td>${r.patente||""}</td><td class="t-time">${hora}</td><td><b>En planta</b></td>
+            <td>${r.vuelta||""}</td><td>${r.tipo_equipo||""}</td><td>${r.tipo_zona||""}</td>
+            <td>${transp}</td>
+            <td class="td-situ ${rowClass}" ${st ? `style="--stage-bg:${st.bg};--stage-ink:${st.ink}"` : ""}>${last.name}</td>
+            <td class="t-time">${ingreso}</td>
+            <td class="t-time">${d1}</td><td class="t-time">${d2}</td><td class="t-time">${d3}</td><td class="t-time">${d4}</td><td class="t-time">${salida}</td>
+          </tr>`);
+        }
+
+        /* ---------- Salidas confirmadas ---------- */
+        for (const r of sal) {
+          const hr          = String(r.hr || "").trim();
+          const horaCarga   = r.horariocarga || r.turno || "";
+          const presentado  = evIdx[hr]?.["PRESENTADO"] || "";
+          const salida      = evIdx[hr]?.["SALIDA"] || "";
+          const transp      = r.empresa || r.transporte || "";
+          const estadoCalc  = calcEstadoCarga(horaCarga, presentado);
+          const situTxt     = "Despachado";
+          const situCls     = situClassByEstado(estadoCalc || r.estado || "");
+
+          const t           = evTimes[hr] || {};
+          const asign       = t.asignacion || "";
+          const inicio      = t.inicio || "";
+          const fin         = t.fin    || "";
+          const eq          = r.tipo_equipo || "";
+
+         rowsHTML.push(`<tr class="row-salida">
+
+            <td>${r.hr||""}</td><td>${r.patente||""}</td><td class="t-time">${horaCarga}</td><td><b>${estadoCalc || r.estado || ""}</b></td>
+            <td>${r.vuelta||""}</td><td>${r.tipo_equipo||""}</td><td>${r.tipo_zona||""}</td>
+            <td>${transp}</td>
+            <td class="td-situ ${situCls}">${situTxt}</td>
+            <td class="t-time">${presentado}</td>
+            <td class="t-time">${durationCell(presentado, asign,  "PRES→ASIG", salida, null,         eq)}</td>
+            <td class="t-time">${durationCell(asign,      inicio, "ASIG→INIC", salida, "ASIGNACION", eq)}</td>
+            <td class="t-time">${durationCell(inicio,     fin,    "INIC→FIN",  salida, "CARGA",      eq)}</td>
+            <td class="t-time">${durationCell(presentado, salida, "ING→SAL",   salida, null,         eq)}</td>
+            <td class="t-time">${salida}</td>
+          </tr>`);
+        }
+
+        document.querySelector("#tblMix tbody").innerHTML =
+          rowsHTML.join("") || `<tr><td colspan="16" class="muted">Sin datos</td></tr>`;
+
+        setupLiveAgoCounters();
+        setupSLADurationTimers();
+      }
+
+      /* ================ EN PLANTA: UNA COLUMNA (sin títulos de dársena) ================ */
+      function renderPlanta(data) {
+        const rows = Array.isArray(data.en_planta_rows) ? data.en_planta_rows : [];
+        const movs = Array.isArray(data.en_planta_movs) ? data.en_planta_movs : [];
+        document.getElementById("countPlanta").textContent = rows.length;
+
+        const equipoByHr = {};
+        for (const r of rows) { if (r && r.hr) equipoByHr[String(r.hr)] = r.tipo_equipo || ""; }
+
+        const lastEv = {};
+        for (const m of movs) {
+          const hr = String(m.hr || "").trim(); if (!hr) continue;
+          const ev = String(m.darsena || "").trim();
+          const t  = String(m.fecha || ""); const score = hmToInt(t);
+          if (!lastEv[hr] || score >= lastEv[hr].score) lastEv[hr] = { evento: ev, time: t, score };
+        }
+
+        const byDock = Object.create(null);
+        for (const r of rows) {
+          const key = String(r.darsenaActual || "").toUpperCase();
+          if (!byDock[key]) byDock[key] = [];
+          byDock[key].push(r);
+        }
+
+        // CHIP (tres líneas: line0 zona, line1 HR-Patente-Equipo, line2 etapa/tiempo)
+        const chip = (zona, hr, patente, eq, evName, evTimeHHMM) => {
+          const colDock = getDockColor(zona);
+          const stage   = stageFromEvent(evName);
+          const startEpoch = hhmmToEpoch(evTimeHHMM);
+          const timeSpan = `<span class="ago-badge live-ago" data-start="${startEpoch}" data-stage="${stage}" data-zone="${zona}">00:00:00</span>`;
+          let line2;
+          if (stage > 0) {
+            const st = STAGE_STYLE[stage];
+            line2 = `<span class="stage-pill" style="--stage-bg:${st.bg};--stage-ink:${st.ink}">${evName || "—"}</span> · ${timeSpan}`;
+          } else {
+            line2 = `${evName || "—"} · ${timeSpan}`;
+          }
+          return `
+            <div class="chip" data-zona="${zona}" style="background:${colDock.bg};color:${colDock.ink};border-color:${colDock.bg}">
+              <div class="line0"><b>${zona || ""}</b><span class="sep"></span></div>
+              <div class="line1"><b>${hr || ""}</b><span class="sep">-</span>${patente || ""}${eq ? `<span class="sep">-</span>${eq}` : ""}</div>
+              <div class="line2">${line2}</div>
+            </div>`;
+        };
+
+        // Combo PRESENTADO/PLAYA/PLAY2 arriba
+        const combinedNames = ["PRESENTADO", "PLAYA", "PLAY2"];
+        const counts = combinedNames.map((n) => (byDock[n] || []).length);
+        document.getElementById("countsLine").innerHTML =
+          `PRESENTADO <span class="badge">${counts[0]}</span> <span class="dot">·</span> ` +
+          `PLAYA <span class="badge">${counts[1]}</span> <span class="dot">·</span> ` +
+          `PLAY2 <span class="badge">${counts[2]}</span>`;
+
+        const comboItems = combinedNames.flatMap((z) =>
+          (byDock[z] || []).map((x) => {
+            const evInfo = lastEv[String(x.hr || "")] || {};
+            return chip(z, x.hr, x.patente, equipoByHr[String(x.hr || "")] || "", evInfo.evento, evInfo.time);
+          })
+        );
+        document.getElementById("chipsCombo").innerHTML =
+          comboItems.join("") || `<div class="muted">—</div>`;
+
+        // Resto (DOCK/ALERO/CARPA) todos en UNA sola lista vertical
+        const restZones = ["DOCK1", "DOCK2", "DOCK3", "ALERO", "CARPA"];
+        const allRestChips = restZones.flatMap(z =>
+          (byDock[z] || []).map(x => {
+            const evInfo = lastEv[String(x.hr || "")] || {};
+            return chip(z, x.hr, x.patente, equipoByHr[String(x.hr || "")] || "", evInfo.evento, evInfo.time);
+          })
+        );
+        document.getElementById("darsCol").innerHTML =
+          allRestChips.join("") || `<div class="muted">—</div>`;
+
+        setupLiveAgoCounters();
+      }
+
+      /* ====== Cronómetros HH:MM:SS en vivo para chips (live-ago) ====== */
+      let agoTimer = null;
+      function setupLiveAgoCounters() {
+        if (agoTimer) { clearInterval(agoTimer); agoTimer = null; }
+        const pad = (n) => (n < 10 ? "0" : "") + n;
+
+        const EXCLUDE = new Set(["PRESENTADO", "PLAYA", "PLAY2"]);
+        const DOCK_ZONES = new Set(["DOCK1","DOCK2","DOCK3","ALERO","CARPA"]);
+        const isDock = (zona) => DOCK_ZONES.has(String(zona || "").toUpperCase());
+        const nodes = Array.from(document.querySelectorAll(".live-ago"));
+
+        const tick = () => {
+          const now = Date.now();
+          for (const el of nodes) {
+            const start = Number(el.dataset.start || 0);
+            const stage = Number(el.dataset.stage || 0);
+            const zona  = String(el.dataset.zone || "");
+            const zonaUP = zona.toUpperCase();
+
+            if (!start) { el.textContent = "00:00:00"; el.classList.remove("overdue"); continue; }
+
+            let diff = Math.max(0, Math.floor((now - start) / 1000));
+            const h = Math.floor(diff / 3600); diff -= h * 3600;
+            const m = Math.floor(diff / 60);
+            const s = diff - m * 60;
+            el.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+
+            const overHour = now - start >= 3600 * 1000;
+            const dock = isDock(zonaUP);
+            const shouldRed = !EXCLUDE.has(zonaUP) && overHour && (dock || stage > 0);
+            if (shouldRed) el.classList.add("overdue"); else el.classList.remove("overdue");
+          }
+        };
+        tick();
+        agoTimer = setInterval(tick, 1000);
+      }
+
+      /* ===== Timer para duraciones SLA en la tabla (live-sla) ===== */
+      let slaTimer = null;
+      function setupSLADurationTimers(){
+        if (slaTimer){ clearInterval(slaTimer); slaTimer = null; }
+
+        const nodes = Array.from(document.querySelectorAll(".live-sla[data-start]"));
+        if (!nodes.length) return;
+
+        const pad = (n)=> (n<10?"0":"")+n;
+
+        const tick = ()=>{
+          const now = Date.now();
+          for (const el of nodes){
+            const start = Number(el.dataset.start || 0);
+            const slaSec = Number(el.dataset.sla || 0);
+            if (!start){
+              el.textContent = "00:00:00";
+              el.classList.remove("sla-over");
+              continue;
+            }
+            let diff = Math.max(0, Math.floor((now - start)/1000));
+            const h = Math.floor(diff/3600); diff -= h*3600;
+            const m = Math.floor(diff/60);
+            const s = diff - m*60;
+            el.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+
+            if (slaSec > 0 && Math.floor((now - start)/1000) >= slaSec){
+              el.classList.add("sla-over");
+            }else{
+              el.classList.remove("sla-over");
+            }
+          }
+        };
+
+        tick();
+        slaTimer = setInterval(tick, 1000);
+      }
+
+      /* Utils */
+      function calcEstadoCarga(horarioCarga, presentado) {
+        const hc = hmToInt(horarioCarga), pr = hmToInt(presentado);
+        if (hc < 0 || pr < 0) return "";
+        return pr <= hc ? "A tiempo" : "Demorado";
+      }
+      function hmToInt(txt) {
+        const m = /(\d{1,2}):(\d{2})/.exec(txt || ""); if (!m) return -1;
+        return (+m[1]) * 60 + (+m[2]);
+      }
+      function hhmmToEpoch(hhmm) {
+        const m = /(\d{1,2}):(\d{2})/.exec(hhmm || "");
+        const now = new Date();
+        if (!m) return now.getTime();
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), +m[1], +m[2], 0, 0);
+        if (d.getTime() > now.getTime()) d.setDate(d.getDate() - 1);
+        return d.getTime();
+      }
+      function fmtDuration(totalSec) {
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const s = totalSec % 60;
+        const pad = (n) => (n < 10 ? "0" : "") + n;
+        return `${pad(h)}:${pad(m)}:${pad(s)}`;
+      }
+      function hmDiff(hhmmStart, hhmmEnd) {
+        const a = hmToInt(hhmmStart), b = hmToInt(hhmmEnd);
+        if (a < 0 || b < 0) return 0;
+        let diff = (b - a) * 60;
+        if (diff < 0) diff += 24 * 3600;
+        return diff;
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const badge = document.getElementById("countPlanta");
+        if (badge) {
+          const h3 = badge.closest("h3");
+          if (h3) h3.classList.add("h3-planta");
+        }
+      });
+
+      (function initTheme() {
+        const light = localStorage.getItem("themeLight") === "1";
+        if (light) document.body.classList.add("light");
+      })();
+
+      startClockPlanta();
+      loadData();
+    </script>
+  </body>
+</html>

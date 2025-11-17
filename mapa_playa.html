@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Mapa de Playa & Dársenas — hoy.json</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    --bg:#0f172a; --ink:#e5e7eb; --muted:#9aa5b1;
+    --panel:#0b1220; --lane:#3a4a62;
+    --truckText:#0b1220;
+
+    --asig-bg:#f59e0b;  --asig-ink:#111827;
+    --ini-bg:#06b6d4;   --ini-ink:#05202a;
+    --fin-bg:#8b5cf6;   --fin-ink:#0c0520;
+
+    /* Tamaño de diseño del lienzo (px) */
+    --base-w:1920;
+    --base-h:1080;
+  }
+
+  html, body {
+    margin:0; padding:0; height:100%; width:100%;
+    background:#000; overflow:hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  /* Lienzo escalable (fit-to-screen) */
+  #fit-root{
+    position:absolute;
+    inset:0;
+    display:block;
+    overflow:hidden;
+  }
+  #stage{
+    width:calc(var(--base-w)*1px);
+    height:calc(var(--base-h)*1px);
+    transform-origin:top left;
+    background:#0b1220;
+    position:relative;
+    box-sizing:border-box;
+  }
+
+  .yard{position:relative;width:100%;height:100%;}
+  .map-layer{position:absolute; inset:0}
+  .overlay{position:absolute; inset:0; pointer-events:none}
+
+  .border{fill:none; stroke:#1e2a3a; stroke-width:.6}
+  .panel{fill:var(--panel); stroke:#2a3a52; stroke-width:.6}
+  .dock-part{stroke:#3d536d; stroke-width:.6}
+  .lane{stroke:var(--lane); stroke-width:.5; stroke-dasharray:2 2; opacity:.85}
+
+  .truck{
+    position:absolute; transform-origin:center center;
+    color:var(--truckText); border:1px solid #00000033; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.35);
+    pointer-events:auto; user-select:none; overflow:hidden;
+    transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    font-weight:700; letter-spacing:.3px;
+  }
+
+  .tc{width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .tc-h{flex-direction:row;gap:14px;padding:10px 14px}
+  .tc-v{flex-direction:column;gap:10px;padding:12px 8px}
+  .tc .left{min-width:84px;text-align:center;font-weight:1000}
+  .tc .mid{line-height:1.08;font-weight:900;text-align:center}
+  .tc .mid b{font-weight:1000}
+
+  .tc-raw{ padding:8px 6px; gap:6px; }
+  .tc-raw .big{ line-height:1.05; font-weight:1000; }
+
+  .event-pill{
+    display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+    min-width:72px;max-width:120px;box-sizing:border-box;
+    padding:8px 10px;border-radius:12px;border:2px solid rgba(0,0,0,.18);
+    text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.05;
+    font-weight:1000;animation:blinkSoft 1.25s ease-in-out infinite
+  }
+  .ev-asig{background:var(--asig-bg);color:var(--asig-ink)}
+  .ev-ini{background:var(--ini-bg);color:var(--ini-ink)}
+  .ev-fin{background:var(--fin-bg);color:var(--fin-ink)}
+  .tc-v .event-pill{width:100%;max-width:unset}
+
+  .timer{
+    margin-top:6px;padding:6px 10px;border-radius:10px;
+    background:rgba(255,255,255,.12);color:var(--ink);border:1px solid rgba(0,0,0,.25);
+    font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;
+    font-variant-numeric:tabular-nums;font-weight:1000
+  }
+  .timer.overdue{background:#ef4444;color:#fff;border-color:#7f1d1d;animation:blinkHard .8s ease-in-out infinite}
+
+  @keyframes blinkSoft{0%,100%{filter:brightness(.96)}50%{filter:brightness(1.22)}}
+  @keyframes blinkHard{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+
+  .loading{
+    position:absolute; inset:auto 10px 10px auto; background:#142031; border:1px solid #2a3a52;
+    color:#cfe3ff; padding:6px 10px; border-radius:8px; font-size:12px;
+  }
+</style>
+</head>
+<body>
+  <div id="fit-root">
+    <div id="stage">
+      <div class="yard" id="yard">
+        <!-- SVG plano (SISTEMA 180x100) -->
+        <div class="map-layer" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 100" width="100%" height="100%">
+            <rect class="border" x="0.25" y="0.25" width="179.5" height="99.5" rx="1.6"/>
+
+             <!-- PRESENTADOS -->
+           <rect class="panel" x="2"  y="6" width="13" style="display:none;" height="93" rx="0"></rect>
+            <!-- Líneas PRESENTADOS: 7 líneas -> 6 lugares -->
+            <g id="Presentados-lanes">
+              <line class="lane" x1="2" y1="5"  x2="15" y2="5"></line>
+              <line class="lane" x1="2" y1="18" x2="15" y2="18"></line>
+              <line class="lane" x1="2" y1="32" x2="15" y2="32"></line>
+              <line class="lane" x1="2" y1="46" x2="15" y2="46"></line>
+              <line class="lane" x1="2" y1="60" x2="15" y2="60"></line>
+              <line class="lane" x1="2" y1="74" x2="15" y2="74"></line>
+              <line class="lane" x1="2" y1="88" x2="15" y2="88"></line>
+            </g>
+
+            <!-- PLAYA (rect oculto, solo líneas) -->
+            <rect class="panel" x="16" y="6" style="display:none;" width="20" height="93" rx="1.2"/>
+            <!-- NUEVAS líneas de PLAYA: 7 líneas → 6 lugares -->
+            <g id="playa-lanes">
+              <line class="lane" x1="16" y1="5"  x2="36" y2="16.5"></line>
+              <line class="lane" x1="16" y1="18" x2="36" y2="29.5"></line>
+              <line class="lane" x1="16" y1="32" x2="36" y2="43.5"></line>
+              <line class="lane" x1="16" y1="46" x2="36" y2="57.5"></line>
+              <line class="lane" x1="16" y1="60" x2="36" y2="71.5"></line>
+              <line class="lane" x1="16" y1="74" x2="36" y2="85.5"></line>
+              <line class="lane" x1="16" y1="88" x2="36" y2="99.5"></line>
+            </g>
+
+            <!-- ALERO -->
+            <rect class="panel" x="108" y="1" width="72" height="21" rx="0"></rect>
+            <!-- CARPA -->
+            <rect class="panel" x="150" y="23" width="30" height="72" rx="0"/>
+
+            <!-- Docks inferiores -->
+            <g id="docks">
+              <rect x="46" y="86" height="12" style="fill:var(--panel);stroke:none" width="98"></rect>
+              <line class="dock-part" x1="46"  y1="86" x2="46"  y2="100"></line>
+              <line class="dock-part" x1="76"  y1="86" x2="76"  y2="100"></line>
+              <line class="dock-part" x1="106" y1="86" x2="106" y2="100"></line>
+              <line class="dock-part" x1="136" y1="86" x2="136" y2="100"></line>
+
+              <line class="lane" x1="46"  y1="86" x2="46"  y2="50"></line>
+              <line class="lane" x1="76"  y1="86" x2="76"  y2="50"></line>
+              <line class="lane" x1="106" y1="86" x2="106" y2="50"></line>
+              <line class="lane" x1="136" y1="86" x2="136" y2="50"></line>
+
+              <text x="9"  y="4" font-size="2" fill="#9fb3d1" text-anchor="middle">PRESENTADOS</text>
+              <text x="25"  y="4" font-size="2" fill="#9fb3d1" text-anchor="middle">PLAYA</text>
+              <text x="61"  y="98.5" font-size="3" fill="#9fb3d1" text-anchor="middle">DOCK1</text>
+              <text x="91"  y="98.5" font-size="3" fill="#9fb3d1" text-anchor="middle">DOCK2</text>
+              <text x="121" y="98.5" font-size="3" fill="#9fb3d1" text-anchor="middle">DOCK3</text>
+              <text x="162" y="98.5" font-size="3" fill="#9fb3d1" text-anchor="middle">CARPA</text>
+              <text x="97" y="12"  y2="50" font-size="5" fill="#9fb3d1" text-anchor="middle">ALERO</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="overlay" id="overlay"></div>
+        <div class="loading" id="loading" style="display: none;">Cargando…</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== Escalado “fit-to-screen” CENTRADO y proporcional ===== */
+function fitToScreen(){
+  const root  = document.getElementById('fit-root');
+  const stage = document.getElementById('stage');
+
+  const W = parseFloat(getComputedStyle(document.documentElement)
+            .getPropertyValue('--base-w')) || 1920;
+  const H = parseFloat(getComputedStyle(document.documentElement)
+            .getPropertyValue('--base-h')) || 1080;
+
+  const vw = root.clientWidth;
+  const vh = root.clientHeight;
+
+  const margin = 2;
+  const availW = Math.max(0, vw - margin * 2);
+  const availH = Math.max(0, vh - margin * 2);
+
+  const s = Math.min(availW / W, availH / H);
+
+  const offsetX = (vw - W * s) / 2;
+  const offsetY = (vh - H * s) / 2;
+
+  stage.style.transformOrigin = 'top left';
+  stage.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${s})`;
+}
+window.addEventListener('resize', fitToScreen);
+fitToScreen();
+
+/* ===== Config dársena & equipos (mapa en 180x100) ===== */
+var STATE = {
+  map: { width_m: 180, height_m: 100 },
+  baseH_m: 4.2,
+  docks: [
+    { id:'PRESENTADO', x:  8.5, y: 12, angle: 0,  scale:1.0,  hScale:1.0, stack:'column',  sep_m: 1.0 },
+    { id:'PLAYA',      x: 18.0, y: 14, angle: 30, scale:1.10, hScale:1.10, stack:'diag',   sep_m: 1.0, anchor:'left' },
+    { id:'ALERO',      x:112.0, y: 11, angle: 0,  scale:3.0,  hScale:1.00, stack:'along',  sep_m: 1.0 },
+    { id:'DOCK1',      x: 48.0, y: 93, angle:-90, scale:3.0,  hScale:1.00, stack:'upBase', sep_m: 1.0 },
+    { id:'DOCK2',      x: 76.0, y: 93, angle:-90, scale:3.0,  hScale:1.00, stack:'upBase', sep_m: 1.0 },
+    { id:'DOCK3',      x:106.0, y: 93, angle:-90, scale:3.0,  hScale:1.00, stack:'upBase', sep_m: 1.0 },
+    { id:'CARPA',      x:128.0, y: 93, angle:-90, scale:3.0,  hScale:1.00, stack:'upBase', sep_m: 1.0 }
+  ],
+  eqLengthsM: {
+    'SEMI':23,'SEMI DOBLE':23,'ACOPLADO':23,
+    '14TN':20,'8TN':18,'4TN':14,'2TN':12,'0.5TN':10
+  },
+  basePxH: 50
+};
+
+/* Largos más marcados SOLO para PLAYA */
+var PLAYA_EQ_LENGTHS_M = {
+  '0.5TN':10,
+  '2TN'  :13,
+  '4TN'  :16,
+  '8TN'  :19,
+  '14TN' :22,
+  'SEMI' :25,
+  'SEMI DOBLE':25,
+  'ACOPLADO' :23
+};
+
+function eqLenPlayM(t){
+  t = (t || '').toUpperCase();
+  if (PLAYA_EQ_LENGTHS_M.hasOwnProperty(t)) return PLAYA_EQ_LENGTHS_M[t];
+  return eqLenM(t);
+}
+
+/* === SLA PARAMETRIZABLE === */
+var SLA_CONFIG = {
+  defaults: {
+    'ASIGNACION DE CARGA': 20,
+    'INICIO DE CARGA': 20,
+    'FIN DE CARGA': 20
+  },
+  byEquipo: {
+    'SEMI':        { 'INICIO DE CARGA': 20, 'ASIGNACION DE CARGA': 20, 'FIN DE CARGA': 20 },
+    'SEMI DOBLE':  { 'INICIO DE CARGA': 20, 'ASIGNACION DE CARGA': 20, 'FIN DE CARGA': 20 },
+    '4TN':         { 'INICIO DE CARGA': 20, 'ASIGNACION DE CARGA': 20, 'FIN DE CARGA': 20 }
+  }
+};
+
+/* ===== Colores por dársena ===== */
+var DOCK_COLORS={
+  'PRESENTADO':{bg:'#2a4365',ink:'#e6f0ff'},
+  'PLAYA':{bg:'#1f5e3b',ink:'#e7ffe9'},
+  'PLAY2':{bg:'#3b2f6b',ink:'#efe8ff'},
+  'DOCK1':{bg:'#6b2f2f',ink:'#ffecec'},
+  'DOCK2':{bg:'#6b4f1f',ink:'#fff2dc'},
+  'DOCK3':{bg:'#265d5d',ink:'#e8ffff'},
+  'ALERO':{bg:'#5a315d',ink:'#ffe9ff'},
+  'CARPA':{bg:'#27472f',ink:'#e9ffe9'}
+};
+var DEFAULT_DOCK={bg:'#243b53',ink:'#e8f0ff'};
+function getDockColor(name){return DOCK_COLORS[String(name||'').toUpperCase()]||DEFAULT_DOCK;}
+
+/* ===== Límites de slots (en unidades del viewBox) ===== */
+var DOCK_BOUNDS = {
+  'PRESENTADO': { left:2,  right:15 },
+  'DOCK1':      { left:46, right:76 },
+  'DOCK2':      { left:76, right:106 },
+  'DOCK3':      { left:106,right:136 },
+  'CARPA':      { left:150,right:180 },
+  'ALERO':      { left:108,right:180, top:1, bottom:22 } // panel y=1, height=21 → 1..22
+};
+
+// factores de largo del camión en ALERO (sobre width-2)
+var ALERO_LEN_FACTORS = {
+  'SEMI':       1.00,
+  'SEMI DOBLE': 1.00,
+  'ACOPLADO':   1.00,
+  '14TN':       0.85,
+  '8TN':        0.75,
+  '4TN':        0.65,
+  '2TN':        0.55,
+  '0.5TN':      0.45
+};
+
+var DOCK_MARGIN        = 4;
+var PRESENTADO_MARGIN  = 0;
+var ALERO_MARGIN       = 1;
+var CARPA_MARGIN       = 3;
+
+var PLAYA_BOUNDS = { left:17, right:36 };
+var PLAYA_MARGIN = 0.01;
+var PLAYA_MAX_SLOTS = 6;
+var PLAYA_SLOTS = [ 
+  { x: 18, y: 12.75 }, 
+  { x: 18, y: 25.75 }, 
+  { x: 18, y: 39.75 }, 
+  { x: 18, y: 53.75 }, 
+  { x: 18, y: 67.75 }, 
+  { x: 18, y: 81.75 } 
+];
+// Altura manual de los camiones en PLAYA (en unidades del viewBox)
+var ALTO_PLAYA          = 1.5;
+var PLAYA_LINE_GAP      = PLAYA_SLOTS[1].y - PLAYA_SLOTS[0].y;
+var PLAYA_SLOT_MARGIN_M = ALTO_PLAYA;
+
+// PRESENTADOS: panel x=2, width=13 ⇒ centro x=8.5
+var PRESENTADO_MAX_SLOTS = 6;
+var PRESENTADO_SLOTS = [
+  { x:8.5, y:(6+18)/2 },
+  { x:8.5, y:(18+32)/2 },
+  { x:8.5, y:(32+46)/2 },
+  { x:8.5, y:(46+60)/2 },
+  { x:8.5, y:(60+74)/2 },
+  { x:8.5, y:(74+88)/2 }
+];
+// Altura entre líneas (en unidades del viewBox) y márgenes configurables
+var PRESENTADO_LINE_GAP      = 18 - 6;    // distancia entre líneas de Presentados
+var PRESENTADO_SLOT_MARGIN_M = 0.5;       // margen arriba y abajo (modificable)
+
+/* ===== Fallback de datos ===== */
+var SAMPLE_JSON="";
+/* {ok:true,meta:{ts_ba:"2025-11-11 21:27:27"},
+en_planta_rows:[
+  {hr:'18298',patente:'AC344AG',darsenaActual:'ALERO',tipo_viaje:'Coatings',tipo_equipo:'2TN',tipo_zona:'MAR DEL PLATA'},
+  {hr:'18220',patente:'LUX680',darsenaActual:'DOCK1',tipo_viaje:'Coatings',tipo_equipo:'0.5TN',tipo_zona:'Coatings'},
+  {hr:'18246',patente:'AE906YY',darsenaActual:'DOCK2',tipo_viaje:'Coatings',tipo_equipo:'2TN',tipo_zona:'Terceros'},
+  {hr:'18250',patente:'AA698XW',darsenaActual:'DOCK3',tipo_viaje:'Coatings',tipo_equipo:'8TN',tipo_zona:'MAR DEL PLATA PLATA'},
+  {hr:'18245',patente:'AC383AG',darsenaActual:'PRESENTADO',tipo_viaje:'Coatings',tipo_equipo:'SEMI',tipo_zona:'Shuttle'},
+  {hr:'18276',patente:'AC344AG',darsenaActual:'PRESENTADO',tipo_viaje:'Coatings',tipo_equipo:'4TN',tipo_zona:'Carpa'},
+  {hr:'99999',patente:'AC383AG',darsenaActual:'PRESENTADO',tipo_viaje:'Coatings',tipo_equipo:'SEMI',tipo_zona:'Shuttle'},
+  {hr:'77777',patente:'AC344AG',darsenaActual:'PLAY2',tipo_viaje:'Coatings',tipo_equipo:'4TN',tipo_zona:'Carpa'},
+  {hr:'18278',patente:'AC344AG',darsenaActual:'CARPA',tipo_viaje:'Coatings',tipo_equipo:'SEMI',tipo_zona:'Carpa'},
+
+  {hr:'18279',patente:'AC344AG',darsenaActual:'PRESENTADO',tipo_viaje:'Coatings',tipo_equipo:'0.5TN',tipo_zona:'MAR DEL PLATA PLATA'},
+  {hr:'20001',patente:'AC344AG',darsenaActual:'PLAYA',tipo_viaje:'Coatings',tipo_equipo:'0.5TN',tipo_zona:'Carpa'},
+  {hr:'20002',patente:'AC344AG',darsenaActual:'PLAYA',tipo_viaje:'Coatings',tipo_equipo:'2TN',tipo_zona:'Carpa'},
+  {hr:'20003',patente:'AC344AG',darsenaActual:'PLAYA',tipo_viaje:'Coatings',tipo_equipo:'4TN',tipo_zona:'Carpa'},
+  {hr:'20004',patente:'AC344AG',darsenaActual:'PLAYA',tipo_viaje:'Coatings',tipo_equipo:'8TN',tipo_zona:'Carpa'},
+  {hr:'20005',patente:'AC344AG',darsenaActual:'PLAYA',tipo_viaje:'Coatings',tipo_equipo:'SEMI',tipo_zona:'Carpa'},
+  {hr:'20006',patente:'AC344AG',darsenaActual:'PLAYA',tipo_viaje:'Coatings',tipo_equipo:'SEMI',tipo_zona:'Carpa'}
+],
+en_planta_movs:[
+  {hr:'18220',darsena:'Inicio de Carga',fecha:'21:27'},
+  {hr:'18246',darsena:'Asignacion de Carga',fecha:'21:27'},
+  {hr:'18245',darsena:'Inicio de Carga',fecha:'21:27'},
+  {hr:'18250',darsena:'Fin de Carga',fecha:'15:53'},
+  {hr:'18278',darsena:'Asignacion de Carga',fecha:'16:17'},
+  {hr:'18298',darsena:'Asignacion de Carga',fecha:'16:17'}
+]} ;
+ */
+/* ===== Helpers ===== */
+var overlay=document.getElementById('overlay'),loading=document.getElementById('loading'),LAST_BY_HR={};
+
+function normalizeDockName(s){
+  if(!s)return'';
+  var n=String(s).trim().toUpperCase();
+  if(n==='PLAY 2'||n==='PLAY2')return'PRESENTADO';
+  if(/^DOCK\s*1$/.test(n))return'DOCK1';
+  if(/^DOCK\s*2$/.test(n))return'DOCK2';
+  if(/^DOCK\s*3$/.test(n))return'DOCK3';
+  return n;
+}
+function eqLenM(t){t=(t||'').toUpperCase();return STATE.eqLengthsM[t]||10;}
+function toPx(xm,ym){
+  var w=overlay.clientWidth,h=overlay.clientHeight;
+  var sx=w/STATE.map.width_m, sy=h/STATE.map.height_m;
+  return {x:Math.round(xm*sx), y:Math.round(ym*sy), sx:sx, sy:sy};
+}
+function clearOverlay(){overlay.innerHTML='';}
+function hmToInt(txt){var m=/(\d{1,2}):(\d{2})/.exec(txt||'');return m?(+m[1])*60+(+m[2]):-1;}
+function hhmmToEpoch(hhmm){
+  var m=/(\d{1,2}):(\d{2})/.exec(hhmm||''),now=new Date();if(!m)return 0;
+  var d=new Date(now.getFullYear(),now.getMonth(),now.getDate(),+m[1],+m[2],0,0);
+  if(d.getTime()>now.getTime())d.setDate(d.getDate()-1);
+  return d.getTime();
+}
+function buildLastEventByHr(movs){
+  var idx={},m,hr,t,score,name;movs=movs||[];
+  for(var i=0;i<movs.length;i++){
+    m=movs[i];hr=String(m.hr||'').trim();if(!hr)continue;
+    t=String(m.fecha||'');score=hmToInt(t);
+    name=String(m.darsena||m.evento||'').trim();
+    if(!idx[hr]||score>=idx[hr].score)idx[hr]={name:name,time:t,score:score};
+  }
+  return idx;
+}
+function stageFromEvent(ev){
+  var e=String(ev||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toUpperCase();
+  if(e.includes('FIN DE CARGA'))return'ev-fin';
+  if(e.includes('INICIO DE CARGA'))return'ev-ini';
+  if(e.includes('ASIGNACION DE CARGA'))return'ev-asig';
+  return'';
+}
+
+function getSlaSeconds(eventName, equipo){
+  var ev=String(eventName||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toUpperCase();
+  var eq=String(equipo||'').toUpperCase();
+  var defMin=SLA_CONFIG.defaults[ev]; if(typeof defMin!=='number') defMin=20;
+  var ov=(SLA_CONFIG.byEquipo[eq]||{})[ev];
+  var mins=(typeof ov==='number')?ov:defMin;
+  return Math.max(0, mins*60);
+}
+
+/* ===== Dibujo de camiones ===== */
+function drawTruck(cfg, trk, idx) {
+  var isAlero = (cfg.id === 'ALERO');
+  var xm, ym, wPx, hPx;
+  var angDeg = (cfg.angle || 0);
+  var ang = angDeg * Math.PI / 180;
+  var sepM = (cfg.sep_m != null ? cfg.sep_m : 1);
+  var equipment = String(trk.tipo_equipo || '').toUpperCase();
+
+  /* ===== ALERO con largo por equipo ===== */
+  if (isAlero) {
+    // Panel ALERO: x=108, width=72, y=1, height=21
+    var panelLeft   = 108;
+    var panelWidth  = 72;
+    var panelTop    = 1.5;
+    var panelHeight = 21;
+
+    // márgenes verticales: y=1+1 hasta 1+21-1
+    var yTopMap = panelTop + 1;
+    var yBotMap = panelTop + panelHeight - 1; // 22
+    var yCenter = (yTopMap + yBotMap) / 2;
+    var hMap    = yBotMap - yTopMap;
+
+    // base para largo: width - 2
+    var baseLenMap = panelWidth - 2; // 70
+    var factor = ALERO_LEN_FACTORS[equipment] != null ? ALERO_LEN_FACTORS[equipment] : 0.7;
+    var lenMap = baseLenMap * factor;
+
+    // arranca en x=108 + 0.5
+    var xStartMap = panelLeft + 1;
+    xm = xStartMap + lenMap / 2;
+    ym = yCenter;
+
+    var pA = toPx(xm, ym);
+    wPx = lenMap * pA.sx;
+    hPx = hMap   * pA.sy;
+
+  } else {
+    /* ===== Resto de sectores (PLAYA, PRESENTADO, DOCKS, CARPA) ===== */
+
+    // Largo base: para PLAYA usamos la tabla especial, para el resto eqLenM
+    var baseLenM = (cfg.id === 'PLAYA')
+      ? eqLenPlayM(trk.tipo_equipo)
+      : eqLenM(trk.tipo_equipo);
+
+    var Lm = baseLenM * (cfg.scale || 1);
+    hPx = STATE.basePxH * (cfg.hScale || cfg.scale || 1);
+
+    xm = cfg.x; ym = cfg.y;
+
+    if (cfg.id === 'PLAYA') {
+      var slotIndexP = Math.min(idx, PLAYA_SLOTS.length - 1);
+      xm = PLAYA_SLOTS[slotIndexP].x;
+      ym = PLAYA_SLOTS[slotIndexP].y;
+    }
+    else if (cfg.id === 'PRESENTADO') {
+      var slotIndexPr = Math.min(idx, PRESENTADO_SLOTS.length - 1);
+      xm = PRESENTADO_SLOTS[slotIndexPr].x;
+      ym = PRESENTADO_SLOTS[slotIndexPr].y;
+    }
+    else {
+      if (cfg.stack === 'upBase' && angDeg === -90) {
+        var p0 = toPx(0,0), half = ((Lm * p0.sx) / p0.sy) / 2;
+        ym = cfg.y - half - idx * (Lm + sepM);
+      } else if (cfg.stack === 'along') {
+        xm += idx * (Lm + sepM);
+      } else if (cfg.stack === 'column') {
+        ym += idx * (STATE.baseH_m + sepM);
+      } else if (cfg.stack === 'diag') {
+        var step = (STATE.baseH_m + sepM);
+        xm += idx * (step * Math.cos(ang));
+        ym += idx * (step * Math.sin(ang));
+      }
+    }
+
+    var p = toPx(xm, ym);
+    wPx = Lm * p.sx; // ← largo SIEMPRE por tipo de equipo
+
+    // PRESENTADO: alto fijo entre líneas
+    if (cfg.id === 'PRESENTADO') {
+      var slotHeightMapPr = PRESENTADO_LINE_GAP - 2 * PRESENTADO_SLOT_MARGIN_M;
+      if (slotHeightMapPr < 1) slotHeightMapPr = 1;
+      hPx = slotHeightMapPr * p.sy;
+    }
+    // PLAYA: alto fijo entre líneas usando ALTO_PLAYA / PLAYA_SLOT_MARGIN_M
+    else if (cfg.id === 'PLAYA') {
+      var slotHeightMapPl = PLAYA_LINE_GAP - 2 * PLAYA_SLOT_MARGIN_M;
+      if (slotHeightMapPl < 1) slotHeightMapPl = 1;
+      hPx = slotHeightMapPl * p.sy;
+    }
+  }
+
+  // Bounds para docks/carpa/presentado (no ALERO aquí, ya calculado)
+  var bounds = DOCK_BOUNDS[cfg.id];
+  var sectorMargin = DOCK_MARGIN;
+  if (cfg.id === 'ALERO')      sectorMargin = ALERO_MARGIN;
+  else if (cfg.id === 'CARPA') sectorMargin = CARPA_MARGIN;
+  else if (cfg.id === 'PRESENTADO') sectorMargin = PRESENTADO_MARGIN;
+
+  if (!isAlero && bounds) {
+    var innerLeftM  = bounds.left  + sectorMargin;
+    var innerRightM = bounds.right - sectorMargin;
+    var centerXM    = (innerLeftM + innerRightM) / 2;
+    xm = centerXM;
+    var pB = toPx(xm, ym);
+    var innerLeftPx  = innerLeftM  * pB.sx;
+    var innerRightPx = innerRightM * pB.sx;
+    var slotWidthPx  = innerRightPx - innerLeftPx;
+
+    if (angDeg === -90) {
+      hPx = slotWidthPx;
+    } else {
+      wPx = slotWidthPx;
+    }
+
+    if (bounds.top != null && bounds.bottom != null) {
+      var innerTopPx  = (bounds.top  + sectorMargin) * pB.sy;
+      var innerBotPx  = (bounds.bottom - sectorMargin) * pB.sy;
+      var slotHeightPx = innerBotPx - innerTopPx;
+      if (angDeg === 0) {
+        hPx = slotHeightPx;
+      }
+    }
+    var pFinal = toPx(xm, ym);
+    xPx = pFinal.x; yPx = pFinal.y;
+  } else {
+    var pFinal2 = toPx(xm, ym);
+    var xPx = pFinal2.x, yPx = pFinal2.y;
+  }
+
+  // Limitador de ancho en PLAYA: SOLO para equipos muy largos (SEMI / DOBLE / ACOPLADO)
+  if (cfg.id === 'PLAYA' && (equipment === 'SEMI' || equipment === 'SEMI DOBLE' || equipment === 'ACOPLADO')) {
+    var pP = toPx(xm, ym);
+    var slotWidthMap = (PLAYA_BOUNDS.right - PLAYA_BOUNDS.left) - PLAYA_MARGIN * 0.5;
+    var slotWidthPx2 = slotWidthMap * pP.sx;
+
+    var cos = Math.cos(ang), sin = Math.sin(ang);
+    var horizWidth = Math.abs(wPx * cos) + Math.abs(hPx * sin);
+
+    if (horizWidth > slotWidthPx2) {
+      var denom = Math.abs(cos);
+      if (denom < 1e-6) denom = 1e-6;
+
+      var maxWPx = (slotWidthPx2 - Math.abs(hPx * sin)) / denom;
+      if (maxWPx < 0) maxWPx = 0;
+
+      if (wPx > maxWPx) {
+        wPx = maxWPx;   // solo recortamos LARGO
+      }
+    }
+  }
+
+  var el = document.createElement('div');
+  el.className = 'truck';
+  el.style.width = wPx + 'px';
+  el.style.height = hPx + 'px';
+  el.style.left = xPx + 'px';
+  el.style.top  = yPx + 'px';
+
+  if (cfg.anchor === 'left') {
+    el.style.transformOrigin = 'left center';
+    el.style.transform = `translate(0,-50%) rotate(${angDeg}deg)`;
+  } else {
+    el.style.transformOrigin = 'center center';
+    el.style.transform = `translate(-50%,-50%) rotate(${angDeg}deg)`;
+  }
+
+  var col = getDockColor(cfg.id);
+  el.style.background = col.bg; el.style.color = col.ink; el.style.borderColor = col.bg;
+
+  var isDetallada = (cfg.id === 'DOCK1' || cfg.id === 'DOCK2' || cfg.id === 'DOCK3' || cfg.id === 'ALERO' || cfg.id === 'CARPA');
+  if (isDetallada) {
+    var tipo =  trk.tipo_zona || '';
+    var hr = trk.hr || '', pat = trk.patente || '';
+    var evInfo = LAST_BY_HR[String(hr)] || {};
+    var evName = evInfo.name || '—', tHH = evInfo.time || '';
+    var start = tHH ? hhmmToEpoch(tHH) : 0, pillCls = stageFromEvent(evName);
+
+    var inner = document.createElement('div');
+    var isHorizontal = (cfg.angle === 0);
+    inner.className = 'tc ' + (isHorizontal ? 'tc-h' : 'tc-v');
+    inner.style.transform = `rotate(${-(cfg.angle || 0)}deg)`;
+
+    var left = document.createElement('div');
+    left.className = 'left';
+    left.textContent = tipo || '';
+    inner.appendChild(left);
+
+    var mid = document.createElement('div');
+    mid.className = 'mid';
+    mid.innerHTML = `<div><b>HR ${hr}</b><br>${pat || 'S/Pat'}</div>`;
+    inner.appendChild(mid);
+
+    var pill = document.createElement('div');
+    pill.className = 'event-pill ' + pillCls;
+    var words = String(evName).split(' ');
+    pill.innerHTML = `<span>${(words.slice(0,2).join(' ')||'')}</span><span>${(words.slice(2).join(' ')||'')}</span>` +
+      (start ? `<div class="timer" data-start="${start}" data-event="${(evName||'')}" data-eq="${(trk.tipo_equipo||'')}">00:00:00</div>` : '');
+    inner.appendChild(pill);
+    // 🔹 Solo en ALERO agrandamos el recuadro del evento
+if (isAlero) {
+  // que el pill sea más ancho y cómodo
+  pill.style.minWidth = '140px';
+  pill.style.maxWidth = '260px';
+  pill.style.padding   = '10px 16px';
+}
+
+    el.appendChild(inner);
+
+(function autosizeDetail(){
+  var core = Math.min(hPx, wPx);
+
+  // base según tamaño del camión
+  var fsBase = Math.max(9, Math.floor(core * 0.24));
+  var fsMid  = Math.max(10, Math.floor(core * 0.26));
+  var fsPill = Math.max(8,  Math.floor(core * 0.22));
+
+  // para equipos chicos en ALERO, etc. (dejá lo que ya tenías)
+  if (isAlero && (equipment === '0.5TN' || equipment === '2TN')) {
+    fsBase = Math.max(8, Math.floor(core * 0.20));
+    fsMid  = Math.max(9, Math.floor(core * 0.22));
+    fsPill = Math.max(7, Math.floor(core * 0.18));
+    pill.style.padding = '4px 6px';
+  }
+
+  function applyAll(){
+    left.style.fontSize = fsBase+'px';
+    mid .style.fontSize = fsMid +'px';
+    pill.style.fontSize = fsPill+'px';
+  }
+  applyAll();
+
+  function overflow(){
+    return el.scrollWidth>el.clientWidth-4 || el.scrollHeight>el.clientHeight-4;
+  }
+  var guard=24;
+  while(overflow() && fsMid>6 && guard--){
+    fsBase = Math.max(6, fsBase-1);
+    fsMid  = Math.max(6, fsMid-1);
+    fsPill = Math.max(6, fsPill-1);
+    applyAll();
+  }
+
+  // 🔹 Ajuste SOLO de la ZONA si es muy larga
+  var zonaTxt = tipo || '';
+  if ((cfg.id === 'DOCK1' || cfg.id === 'DOCK2' || cfg.id === 'DOCK3' || cfg.id === 'CARPA')
+      && zonaTxt.length > 9) {
+
+    var factor = 9 / zonaTxt.length;        // más larga → más chico
+    var fsZona = Math.max(6, Math.round(fsBase * factor));
+    left.style.fontSize = fsZona + 'px';
+  }
+})();
+
+
+  } else {
+    // Camiones simples: PRESENTADO / PLAYA / PLAY2
+    var raw = document.createElement('div');
+    raw.className = 'tc-raw';
+
+    // Zona (arriba), HR, Patente
+    var zonaTxt = trk.tipo_zona || cfg.id || '';
+    raw.innerHTML =
+      `<div class="big line0">${zonaTxt}</div>` +
+      `<div class="big line1">HR ${trk.hr || ''}</div>` +
+      `<div class="big line2">${trk.patente || 'S/Pat'}</div>`;
+    el.appendChild(raw);
+
+    // AJUSTE DE LETRAS PARA PRESENTADO / PLAYA:
+(function autosizeSimple(){
+  raw.style.padding = '2px 4px';
+  raw.style.gap = '2px';
+
+  var fs = Math.max(10, Math.floor(hPx * 0.21));
+  var lines = raw.querySelectorAll('.big');
+  lines.forEach(n=>{
+    n.style.fontSize  = fs+'px';
+    n.style.whiteSpace = 'nowrap';
+  });
+
+  // 🔹 Ajuste SOLO de la ZONA si es PRESENTADO y es muy larga
+  if (cfg.id === 'PRESENTADO') {
+    var zonaEl  = raw.querySelector('.line0');
+    var zonaTxt = trk.tipo_zona || cfg.id || '';
+
+    if (zonaEl && zonaTxt.length > 9) {
+      var factor = 9 / zonaTxt.length;          // más letras → más chico
+      var fsZona = Math.max(6, Math.round(fs * factor));
+      zonaEl.style.fontSize = fsZona + 'px';
+    }
+  }
+})();
+
+  }
+
+  overlay.appendChild(el);
+}
+
+/* ===== Render ===== */
+function groupByDock(rows){var map={};for(var i=0;i<rows.length;i++){var r=rows[i],d=normalizeDockName(r.darsenaActual);(map[d]||(map[d]=[])).push(r);}return map;}
+function render(DATA){
+  clearOverlay();window.__lastData=DATA;
+  var rows=(DATA.en_planta_rows||[]).map(r=>Object.assign({},r,{darsenaActual:normalizeDockName(r.darsenaActual)}));
+  var byDock=groupByDock(rows);LAST_BY_HR=buildLastEventByHr(DATA.en_planta_movs||[]);
+
+  for (var i = 0; i < STATE.docks.length; i++) {
+    var cfg = STATE.docks[i];
+    var list = (byDock[cfg.id] || []).slice().sort((a,b)=>String(a.hr||'').localeCompare(String(b.hr||'')));
+
+    if (cfg.id === 'PLAYA')      list = list.slice(0, PLAYA_MAX_SLOTS);
+    if (cfg.id === 'PRESENTADO') list = list.slice(0, PRESENTADO_MAX_SLOTS);
+
+    for (var j = 0; j < list.length; j++) drawTruck(cfg, list[j], j);
+  }
+
+  loading.textContent=(DATA.meta&&DATA.meta.ts_ba)?('Actualizado: '+DATA.meta.ts_ba):'Datos locales';
+  setupLiveTimers();
+}
+
+/* ===== Timers con SLA ===== */
+var timerHandle=null;
+function setupLiveTimers(){
+  if(timerHandle){clearInterval(timerHandle);timerHandle=null;}
+  var nodes=[].slice.call(document.querySelectorAll('.timer[data-start]'));
+  function tick(){
+    var now=Date.now();
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i],st=Number(n.getAttribute('data-start')||'0');
+      var ev=n.getAttribute('data-event')||'', eq=n.getAttribute('data-eq')||'';
+      var limitSec=getSlaSeconds(ev, eq);
+      if(!st){n.textContent='00:00:00';continue;}
+      var diff=Math.floor((now-st)/1000),h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+      var pad=x=>x<10?'0'+x:x; n.textContent=pad(h)+':'+pad(m)+':'+pad(s);
+      if(diff>=limitSec) n.classList.add('overdue'); else n.classList.remove('overdue');
+    }
+  }
+  tick(); timerHandle=setInterval(tick,1000);
+}
+
+/* ===== Carga JSON + Auto-Refresh ===== */
+var JSON_URL='https://script.google.com/macros/s/AKfycbwW8_C7xDTOGiqda99_b5vM8lEV4WwqX78DUvx3pFG26kZ9N3_d5agZ1TbJXtUD2zcQ/exec';
+var REFRESH_MS=60000, isLoading=false, refreshHandle=null;
+
+function loadHoy(){
+  if(isLoading) return;
+  isLoading=true;
+  loading.style.display='block';
+  loading.textContent='Cargando…';
+  var url = JSON_URL + (JSON_URL.indexOf('?')>-1?'&':'?') + 't=' + Date.now();
+
+  fetch(url,{cache:'no-store',mode:'cors'})
+    .then(res=>{if(!res.ok)throw new Error('HTTP '+res.status);return res.text();})
+    .then(txt=>{var data=JSON.parse(txt);render(data);})
+    .catch(e=>{console.warn('Fallo remoto, uso SAMPLE_JSON',e);render(SAMPLE_JSON);})
+    .finally(()=>{isLoading=false; loading.style.display='none';});
+}
+
+window.addEventListener('resize',()=>{fitToScreen(); if(window.__lastData)render(window.__lastData);});
+
+function startAutoRefresh(){ stopAutoRefresh(); refreshHandle=setInterval(()=>{ if(!document.hidden){ loadHoy(); } }, REFRESH_MS); }
+function stopAutoRefresh(){ if(refreshHandle){ clearInterval(refreshHandle); refreshHandle=null; } }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden){ stopAutoRefresh(); } else { loadHoy(); startAutoRefresh(); }});
+
+loadHoy();
+startAutoRefresh();
+</script>
+</body>
+</html>
