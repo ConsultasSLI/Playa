@@ -879,7 +879,7 @@ mapa3D = new maplibregl.Map({
     container: 'map3d',
     style: 'https://tiles.openfreemap.org/styles/liberty',
     center: [-58.69073714, -34.44086848],
-    zoom: 13.73223,
+    zoom: 13.39821048087831,
     pitch: 52,
     bearing: -20,
     antialias: true
@@ -939,7 +939,7 @@ mapa3D = new maplibregl.Map({
                 source: buildingLayer.source,
                 'source-layer': 'building',
                 type: 'fill-extrusion',
-                minzoom: 13,
+                minzoom: 13.39821048087831,
                 paint: {
                     'fill-extrusion-color': '#334155',
                     'fill-extrusion-height': ['coalesce', ['to-number', ['get', 'render_height']], ['to-number', ['get', 'height']], 8],
@@ -1020,7 +1020,7 @@ mapa3D = new maplibregl.Map({
                 const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
      mapa3D.easeTo({
     center: [-58.69073714, -34.44086848],
-    zoom: 13.73223,
+    zoom: 13.39821048087831,
     bearing: -20,
     pitch: 52,
     duration: 1100
