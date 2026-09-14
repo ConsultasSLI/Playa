@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Interplanta - Ruta Oficial GPS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0e17; 
+            --card: #151c2c; 
+            --accent: #00e676;
+            --text-main: #ffffff;
+            --text-dim: #cbd5e1;
+            --border: #2a3b55;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; padding: 20px;
+        }
+
+        /* Cabecera y Reloj */
+        .header-box { margin-bottom: 30px; }
+        .clock-box { 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 15px; 
+            min-width: 200px;
+            height: 100%;
+        }
+        .time-now { font-size: 2.4rem; font-weight: 800; color: var(--accent); display: block; line-height: 1; }
+        .kpi-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+
+        /* Acordeón de Viajes */
+        .accordion-item { background: transparent; border: none; margin-bottom: 12px; }
+        .accordion-button { 
+            background: var(--card) !important; 
+            color: white !important; 
+            border: 1px solid var(--border) !important; 
+            border-radius: 12px !important;
+            padding: 20px;
+        }
+        .accordion-button:not(.collapsed) { box-shadow: 0 0 20px rgba(0,230,118,0.1); border-color: var(--accent) !important; }
+        .accordion-button::after { filter: invert(1); }
+
+        /* Timeline de Eventos */
+        .timeline { position: relative; padding-left: 30px; list-style: none; border-left: 2px solid var(--border); margin-left: 10px; }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-dot { 
+            position: absolute; left: -39px; height: 16px; width: 16px; border-radius: 50%; 
+            background: #475569; border: 3px solid var(--bg); z-index: 2;
+        }
+        .timeline-content { 
+            background: rgba(255,255,255,0.04); border-radius: 10px; padding: 12px 18px; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .event-name { font-weight: 600; color: #f8fafc; font-size: 1.05rem; }
+        .event-time { color: #ffffff; font-size: 0.9rem; font-weight: 500; }
+
+        /* Colores dinámicos */
+        .ruta .timeline-dot { background: #3b82f6; }
+        .carga .timeline-dot { background: #22c55e; }
+        .puerta .timeline-dot { background: #f59e0b; }
+
+        .loading-overlay { opacity: 0.5; pointer-events: none; transition: 0.3s; }
+        
+        /* Input personalizado */
+        .obj-input {
+            background: #1e293b;
+            color: white;
+            border: 1px solid var(--border);
+            text-align: center;
+            width: 70px;
+            font-weight: bold;
+        }
+        .obj-input:focus { background: #1e293b; color: white; border-color: var(--accent); box-shadow: none; }
+
+
+        /* ======================================================
+           MONITOR EN VIVO + MAPA 3D
+           ====================================================== */
+        .live-monitor {
+            background: linear-gradient(145deg, rgba(21,28,44,.98), rgba(10,14,23,.98));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 18px 50px rgba(0,0,0,.30);
+        }
+        .live-monitor-header { padding: 18px 22px 10px; }
+        .live-status {
+            font-size: clamp(1.15rem, 2.4vw, 1.8rem);
+            font-weight: 900;
+            letter-spacing: .4px;
+            color: var(--accent);
+        }
+        .live-gps-time {
+            font-size: clamp(1rem, 2vw, 1.35rem);
+            font-weight: 800;
+            color: #fff;
+        }
+        .direction-subtitle { color: var(--text-dim); font-size: .85rem; margin-top: 3px; }
+        .route-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+        .route-chip {
+            display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 999px;
+            font-size: .68rem; font-weight: 800; letter-spacing: .35px; text-transform: uppercase;
+            border: 1px solid var(--border); background: rgba(15,23,42,.78); color: var(--text-dim);
+        }
+        .route-chip.ok { color: var(--accent); border-color: rgba(0,230,118,.38); }
+        .route-chip.warn { color: var(--danger); border-color: rgba(239,68,68,.45); }
+        .route-progress-wrap { padding: 10px 28px 12px; }
+        .route-progress-line {
+            display: grid;
+            grid-template-columns: 64px 1fr 64px;
+            align-items: center;
+            gap: 12px;
+        }
+        .route-endpoint { text-align: center; font-weight: 900; font-size: .92rem; color: #fff; }
+        .route-endpoint-dot {
+            width: 13px; height: 13px; border-radius: 50%; margin: 5px auto 0;
+            background: #fff; box-shadow: 0 0 0 5px rgba(255,255,255,.08);
+        }
+        .route-rail {
+            position: relative; height: 8px; border-radius: 999px; background: #334155;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+        }
+        .route-fill {
+            position: absolute; inset: 0 auto 0 0; width: 0%; border-radius: inherit;
+            background: linear-gradient(90deg, #22c55e, #00e676); transition: width 1.6s ease;
+        }
+        .truck-progress {
+            position: absolute; left: 0%; top: 50%; transform: translate(-50%, -50%);
+            transition: left 1.6s ease; z-index: 5; text-align: center;
+            filter: drop-shadow(0 6px 7px rgba(0,0,0,.45));
+        }
+        .truck-progress .truck-icon { display: block; font-size: 2rem; line-height: 1; }
+        .truck-progress .truck-percent {
+            display: inline-block; margin-top: 4px; padding: 2px 9px; border-radius: 999px;
+            background: rgba(10,14,23,.92); border: 1px solid var(--border); color: #fff;
+            font-size: .69rem; font-weight: 800; white-space: nowrap; max-width: 180px;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        .map-wrap { position: relative; }
+        #map3d {
+            width: 100%; height: 300px; background: #111827;
+            border-top: 1px solid rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.05);
+        }
+        .map-message {
+            position: absolute; inset: 0; display: grid; place-items: center; z-index: 3;
+            background: rgba(10,14,23,.82); color: var(--text-dim); font-weight: 700; pointer-events: none;
+        }
+        .map-message.hidden { display: none; }
+        .maplibregl-ctrl-attrib { font-size: 10px; }
+        .map-plant-marker {
+            background: rgba(10,14,23,.94); color: #fff; border: 2px solid var(--accent);
+            border-radius: 10px; padding: 7px 10px; font-weight: 900; font-size: .72rem;
+            box-shadow: 0 8px 22px rgba(0,0,0,.35); white-space: nowrap;
+        }
+        .map-truck-marker {
+            width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+            background: rgba(10,14,23,.95); border: 2px solid var(--accent);
+            box-shadow: 0 0 0 7px rgba(0,230,118,.14), 0 10px 25px rgba(0,0,0,.45);
+        }
+        .map-truck-marker .map-truck-inner { font-size: 1.65rem; line-height: 1; transition: transform .7s ease; }
+        .eta-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); }
+        .eta-item { background: var(--card); text-align: center; padding: 15px 8px; }
+        .eta-value {
+            display: block; font-size: clamp(1.15rem, 2.4vw, 1.65rem); font-weight: 900;
+            color: #fff; line-height: 1.1;
+        }
+        .eta-label {
+            display: block; margin-top: 4px; color: var(--text-dim); font-size: .68rem;
+            text-transform: uppercase; letter-spacing: .9px; font-weight: 700;
+        }
+        .gps-warning { color: var(--danger) !important; }
+        @media (max-width: 768px) {
+            #map3d { height: 240px; }
+            .eta-grid { grid-template-columns: repeat(2, 1fr); }
+            .route-progress-wrap { padding-left: 14px; padding-right: 14px; }
+            .route-progress-line { grid-template-columns: 54px 1fr 54px; gap: 8px; }
+        }
+
+        /* PROGRAMACIÓN TMS */
+        .tms-panel {
+            background: linear-gradient(145deg, rgba(21,28,44,.98), rgba(12,18,31,.98));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
+        }
+        .tms-title { color: #70bbff; font-weight: 900; letter-spacing: .3px; }
+        .tms-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .tms-controls .form-control { width: 155px; background: #111827; color: #fff; border-color: var(--border); }
+        .tms-summary { color: var(--text-dim); font-size: .86rem; font-weight: 700; }
+        .tms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin-top: 12px; }
+        .tms-truck {
+            background: rgba(255,255,255,.035); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 14px;
+        }
+        .tms-truck-head { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+        .tms-patente { font-size: 1.15rem; font-weight: 900; color: #fff; letter-spacing: .6px; }
+        .tms-count { color: var(--accent); font-weight: 900; white-space: nowrap; }
+        .tms-detail { color: var(--text-dim); font-size: .75rem; margin-top: 3px; }
+        .tms-hours { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+        .tms-hour {
+            padding: 3px 7px; border-radius: 999px; background: #111827; border: 1px solid #334155;
+            color: #e2e8f0; font-size: .7rem; font-weight: 800;
+        }
+        .tms-error { color: var(--danger); font-weight: 800; }
+
+    
+        /* ======================================================
+           LAYOUT INTEGRADO TMS + GPS
+           ====================================================== */
+        .section-mini-title {
+            color: #70bbff;
+            font-size: .78rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .9px;
+            margin-bottom: 8px;
+        }
+        .unified-monitor { overflow: hidden; }
+        .unified-topbar {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 18px;
+            padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,.06);
+        }
+        .ops-layout {
+            display: grid;
+            grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+            align-items: stretch;
+        }
+        .ops-sidebar {
+            padding: 18px 20px;
+            border-right: 1px solid rgba(255,255,255,.06);
+            background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.01));
+        }
+        .sidebar-block + .sidebar-block {
+            margin-top: 16px; padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,.06);
+        }
+        .ops-map-panel {
+            display: flex; flex-direction: column; min-width: 0;
+        }
+        .map-panel-head {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 14px;
+            padding: 18px 22px 8px;
+        }
+        .ops-map-panel .route-progress-wrap { padding: 6px 24px 12px; }
+        .ops-map-panel #map3d {
+            height: 460px;
+            border-top: 1px solid rgba(255,255,255,.05);
+            border-bottom: 0;
+        }
+        .ops-sidebar .eta-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px; border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border); margin-top: 10px;
+        }
+        .ops-sidebar .eta-item { padding: 16px 10px; }
+        .ops-sidebar .eta-value { font-size: clamp(1.05rem, 2vw, 1.5rem); }
+        .ops-sidebar .route-meta { margin-top: 10px; }
+        .unified-monitor .tms-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .unified-monitor .tms-truck {
+            background: rgba(255,255,255,.04);
+            border-color: rgba(112,187,255,.18);
+        }
+        .unified-monitor .tms-patente { font-size: 1.35rem; }
+        .unified-monitor .tms-detail { font-size: .8rem; }
+        .unified-monitor .tms-hours { gap: 6px; }
+        .unified-monitor .tms-hour { font-size: .74rem; padding: 4px 8px; }
+        .unified-monitor .tms-controls .form-control { width: 160px; }
+        .unified-monitor .route-endpoint { font-size: 1rem; }
+        @media (max-width: 1100px) {
+            .ops-layout { grid-template-columns: 1fr; }
+            .ops-sidebar {
+                border-right: 0;
+                border-bottom: 1px solid rgba(255,255,255,.06);
+            }
+            .ops-map-panel #map3d { height: 340px; }
+        }
+        @media (max-width: 768px) {
+            .unified-topbar { padding: 16px 16px 14px; }
+            .ops-sidebar { padding: 16px; }
+            .map-panel-head { padding: 16px 16px 8px; }
+            .ops-map-panel .route-progress-wrap { padding-left: 16px; padding-right: 16px; }
+            .ops-sidebar .eta-grid { grid-template-columns: repeat(2, 1fr); }
+            .ops-map-panel #map3d { height: 280px; }
+        }
+
+
+        /* ======================================================
+           V3 - OPERACIÓN + PLANIFICADOR UNIFICADOS
+           ====================================================== */
+        .planner-strip {
+            padding: 14px 22px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            background: rgba(0,230,118,.018);
+        }
+        .planner-strip-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .planner-strip-title {
+            color: var(--accent);
+            font-size: .86rem;
+            font-weight: 900;
+            letter-spacing: .45px;
+            text-transform: uppercase;
+        }
+        .planner-strip .progress {
+            height: 28px !important;
+            margin-bottom: 8px !important;
+        }
+        .planner-strip-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .tms-hidden-data { display: none !important; }
+        .ops-sidebar .sidebar-block:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+        .full-route-progress {
+            padding: 16px 26px 18px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            background: rgba(255,255,255,.012);
+        }
+        .full-route-progress .route-progress-line {
+            grid-template-columns: 72px minmax(0, 1fr) 72px;
+            gap: 14px;
+        }
+        .full-route-progress .route-rail { height: 9px; }
+        .full-route-progress .route-endpoint { font-size: 1rem; }
+        .ops-map-panel #map3d { height: 480px; }
+        @media (max-width: 1100px) {
+            .ops-map-panel #map3d { height: 360px; }
+        }
+        @media (max-width: 768px) {
+            .planner-strip { padding: 12px 16px 14px; }
+            .full-route-progress { padding: 14px 16px 18px; }
+            .full-route-progress .route-progress-line {
+                grid-template-columns: 58px minmax(0, 1fr) 58px;
+                gap: 8px;
+            }
+            .ops-map-panel #map3d { height: 300px; }
+        }
+
+    
+        /* ======================================================
+           V5 - MATCH CAPTURA DE REFERENCIA
+           ====================================================== */
+        .header-box { margin-bottom: 26px; }
+        .clock-box.match-clock {
+            min-width: 185px;
+            padding: 13px 16px 14px;
+            border-radius: 14px;
+            background: #141d2e;
+            border: 1px solid #2a3b55;
+        }
+        .clock-box.match-clock .time-now {
+            font-size: 2.15rem;
+            line-height: 1.02;
+            margin-top: 3px;
+        }
+        .sync-small-label {
+            display:block;
+            margin-top:2px;
+            color:#cbd5e1;
+            font-size:.62rem;
+            text-transform:uppercase;
+            letter-spacing:.8px;
+            font-weight:700;
+        }
+        .sync-small-value {
+            display:block;
+            margin-top:3px;
+            color:#fff;
+            font-size:1.02rem;
+            font-weight:800;
+        }
+
+        .live-monitor.unified-monitor {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid #2a3b55;
+            background: #111827;
+            box-shadow: none;
+        }
+
+        /* Solo el planificador arriba, como en la captura */
+        .unified-topbar { display:none !important; }
+        .planner-strip {
+            padding: 16px 18px 14px;
+            border-bottom: 1px solid #26364f;
+            background: #121b2a;
+        }
+        .planner-strip-head {
+            margin-bottom: 10px;
+        }
+        .planner-strip-title {
+            color: #00e676;
+            font-size: .82rem;
+            letter-spacing: .5px;
+            font-weight: 900;
+        }
+        .planner-strip .progress {
+            height: 24px !important;
+            border-radius: 4px !important;
+            background:#1f2a3d !important;
+            overflow:hidden;
+            margin-bottom:8px !important;
+        }
+        .planner-strip .progress-bar {
+            font-size:.82rem !important;
+        }
+        .planner-strip-footer {
+            margin-top:6px;
+        }
+        .planner-strip #estadoProyeccion {
+            background:#111827 !important;
+            border-color:#aeb8c6 !important;
+            border-radius:6px !important;
+            padding:4px 10px !important;
+        }
+
+        /* Línea oficial inmediatamente debajo del planificador */
+        .full-route-progress {
+            order: 1;
+            padding: 14px 26px 16px;
+            border-top: 0;
+            border-bottom: 1px solid #26364f;
+            background:#111827;
+        }
+        .full-route-progress .route-progress-line {
+            grid-template-columns: 64px minmax(0,1fr) 64px;
+            gap: 12px;
+        }
+        .full-route-progress .route-rail { height:8px; }
+        .full-route-progress .route-endpoint {
+            font-size:.92rem;
+            color:#fff;
+        }
+        .full-route-progress .route-endpoint-dot {
+            width:13px; height:13px;
+            margin-top:5px;
+        }
+        .full-route-progress .truck-icon { font-size:1.85rem; }
+        .full-route-progress .truck-percent {
+            font-size:.66rem;
+            padding:2px 8px;
+            margin-top:3px;
+        }
+
+        /* Contenido: izquierda datos / derecha mapa */
+        .unified-monitor {
+            display:flex;
+            flex-direction:column;
+        }
+        .ops-layout {
+            order: 2;
+            display:grid;
+            grid-template-columns: 330px minmax(0,1fr);
+            align-items:stretch;
+            min-height: 420px;
+        }
+        .ops-sidebar {
+            padding: 16px 18px;
+            border-right:1px solid #26364f;
+            border-bottom:0;
+            background:#121b2a;
+        }
+        .ops-sidebar .sidebar-block {
+            background:transparent;
+            border:0;
+            border-radius:0;
+            padding:0;
+            box-shadow:none;
+        }
+        .ops-sidebar .sidebar-block + .sidebar-block {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top:1px solid #25344d;
+        }
+        .ops-sidebar .sidebar-block:first-child {
+            margin-top:0;
+            padding-top:0;
+            border-top:0;
+        }
+        .section-mini-title {
+            color:#70bbff;
+            font-size:.72rem;
+            margin-bottom:12px;
+            letter-spacing:.6px;
+            font-weight:900;
+        }
+        .live-status {
+            font-size:1.55rem;
+            line-height:1.05;
+            color:#00e676;
+        }
+        .direction-subtitle {
+            font-size:.78rem;
+            color:#fff;
+            margin-top:5px;
+        }
+        .route-meta { display:none !important; }
+
+        .ops-sidebar .eta-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:1px;
+            border:1px solid #2a3b55;
+            border-radius:10px;
+            overflow:hidden;
+            background:#2a3b55;
+            margin-top:0;
+        }
+        .ops-sidebar .eta-item {
+            background:#141d2e;
+            padding:14px 8px 13px;
+        }
+        .ops-sidebar .eta-value {
+            font-size:1.38rem;
+            line-height:1.05;
+        }
+        .ops-sidebar .eta-label {
+            font-size:.62rem;
+            margin-top:5px;
+        }
+        .time-box-inline {
+            border:1px solid #2a3b55;
+            border-radius:10px;
+            background:#141d2e;
+            text-align:center;
+            padding:14px 8px;
+        }
+        .time-box-inline .small-label {
+            display:block;
+            color:#fff;
+            font-size:.63rem;
+            text-transform:uppercase;
+            letter-spacing:.9px;
+        }
+        .time-box-inline .big-value {
+            display:block;
+            margin-top:7px;
+            color:#00e676;
+            font-size:1.95rem;
+            line-height:1;
+            font-weight:500;
+        }
+        .time-box-inline .small-sub {
+            display:block;
+            margin-top:6px;
+            color:#64748b;
+            font-size:.68rem;
+        }
+
+        /* Mapa sin encabezado extra */
+        .ops-map-panel {
+            padding:0;
+            min-width:0;
+            background:#111827;
+        }
+        .map-panel-head { display:none !important; }
+        .map-wrap { padding:0; height:100%; }
+        .ops-map-panel #map3d {
+            height:100%;
+            min-height:420px;
+            border:0;
+            border-radius:0;
+        }
+
+        .tms-hidden-data { display:none !important; }
+        .classic-kpis-row { display:none !important; }
+
+        @media (max-width: 1000px) {
+            .ops-layout { grid-template-columns:1fr; }
+            .ops-sidebar { border-right:0; border-bottom:1px solid #26364f; }
+            .ops-map-panel #map3d { min-height:340px; height:340px; }
+        }
+        @media (max-width: 768px) {
+            .planner-strip { padding:12px 14px; }
+            .full-route-progress { padding:12px 14px 16px; }
+            .full-route-progress .route-progress-line {
+                grid-template-columns:54px minmax(0,1fr) 54px;
+                gap:8px;
+            }
+            .ops-sidebar { padding:14px; }
+            .ops-map-panel #map3d { min-height:280px; height:280px; }
+        }
+
+    
+        /* ======================================================
+           V6 - CABECERA COMPACTA
+           ====================================================== */
+        body { padding-top: 10px; }
+        .header-box {
+            margin-bottom: 12px !important;
+            min-height: 58px;
+        }
+        .header-box h1 {
+            font-size: 1.65rem;
+            line-height: 1.05;
+            margin-bottom: 2px !important;
+        }
+        .header-box p {
+            font-size: .76rem;
+            line-height: 1.1;
+        }
+        .clock-box.match-clock {
+            min-width: 250px;
+            padding: 7px 12px 8px;
+            border-radius: 12px;
+            display: inline-grid !important;
+            grid-template-columns: 1.35fr 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 14px;
+            align-items: center;
+            text-align: center;
+        }
+        .clock-box.match-clock .kpi-label {
+            grid-column: 1;
+            grid-row: 1;
+            margin: 0;
+            font-size: .58rem;
+            line-height: 1;
+        }
+        .clock-box.match-clock .time-now {
+            grid-column: 1;
+            grid-row: 2;
+            font-size: 1.72rem;
+            line-height: 1;
+            margin: 2px 0 0;
+        }
+        .clock-box.match-clock .sync-small-label {
+            grid-column: 2;
+            grid-row: 1;
+            margin: 0;
+            font-size: .52rem;
+            line-height: 1;
+        }
+        .clock-box.match-clock .sync-small-value {
+            grid-column: 2;
+            grid-row: 2;
+            margin: 2px 0 0;
+            font-size: .9rem;
+            line-height: 1;
+        }
+        @media (max-width: 768px) {
+            .header-box { margin-bottom: 10px !important; }
+            .header-box h1 { font-size: 1.4rem; }
+            .clock-box.match-clock {
+                min-width: 220px;
+                width: auto;
+                padding: 6px 10px 7px;
+            }
+            .clock-box.match-clock .time-now { font-size: 1.55rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row header-box align-items-center">
+        <div class="col-md-6">
+            <h1 class="h2 mb-1">Logística Interplanta</h1>
+            <p class="text-muted mb-0"><i class="bi bi-circle-fill text-success small me-1"></i> Monitor de Flota en Vivo</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+            <div class="clock-box match-clock d-inline-block text-center" style="height:auto;">
+                <span class="kpi-label">Hora Actual</span>
+                <span id="reloj" class="time-now">00:00:00</span>
+                <span class="sync-small-label">Última sincronización</span>
+                <span id="syncTimeHeader" class="sync-small-value">--:--:--</span>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!-- MONITOR INTEGRADO TMS + GPS + PLANIFICADOR -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <section class="live-monitor unified-monitor">
+                <input id="tmsFecha" type="date" style="display:none">
+                <div id="tmsResumen" style="display:none"></div>
+
+                <!-- PLANIFICADOR INTEGRADO -->
+                <div class="planner-strip">
+                    <div class="planner-strip-head">
+                        <div class="planner-strip-title"><i class="bi bi-speedometer2 me-2"></i>Planificador de Turno (12 hs)</div>
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="text-muted small fw-bold mb-0">Viajes programados TMS:</label>
+                            <input type="number" id="objetivoViajes" class="form-control form-control-sm obj-input" value="4" min="1" onchange="calcularProyeccion()">
+                        </div>
+                    </div>
+                    <div class="progress" style="background-color:#1e293b; border-radius:8px;">
+                        <div id="barraProgreso" class="progress-bar bg-success progress-bar-striped progress-bar-animated fs-6 fw-bold" role="progressbar" style="width:0%;">0 / 4</div>
+                    </div>
+                    <div class="planner-strip-footer">
+                        <div id="ritmoActual" class="text-info small fw-bold"><i class="bi bi-stopwatch"></i> Ritmo: Calculando...</div>
+                        <div id="estadoProyeccion" class="small fw-bold border rounded px-2 py-1 bg-dark">Esperando inicio de operación...</div>
+                    </div>
+                </div>
+
+                <!-- Se mantiene el contenedor para la lógica TMS, pero queda oculto visualmente -->
+                <div id="tmsCamiones" class="tms-hidden-data"></div>
+
+
+
+                <!-- RECORRIDO OFICIAL A TODO EL ANCHO -->
+                <div class="full-route-progress">
+                    <div class="route-progress-line">
+                        <div class="route-endpoint"><span id="origenRutaLabel">AKZO</span><div class="route-endpoint-dot"></div></div>
+                        <div class="route-rail">
+                            <div id="routeFill" class="route-fill"></div>
+                            <div id="truckProgress" class="truck-progress">
+                                <span class="truck-icon">🚚</span>
+                                <span id="truckPercent" class="truck-percent">0%</span>
+                            </div>
+                        </div>
+                        <div class="route-endpoint"><span id="destinoRutaLabel">SLI</span><div class="route-endpoint-dot"></div></div>
+                    </div>
+                </div>
+
+                <div class="ops-layout">
+                    <aside class="ops-sidebar">
+                        <div class="sidebar-block">
+                            <div class="section-mini-title">Estado actual</div>
+                            <div id="estadoGpsActual" class="live-status">🚚 CARGANDO POSICIÓN GPS...</div>
+                            <div id="detalleDireccion" class="direction-subtitle">Determinando ubicación y próximo destino</div>
+                            <div class="route-meta">
+                                <span id="rutaFuente" class="route-chip ok">Ruta oficial GPS</span>
+                                <span id="desvioRuta" class="route-chip">Esperando GPS</span>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-block">
+                            <div class="section-mini-title">Indicadores del viaje</div>
+                            <div class="eta-grid">
+                                <div class="eta-item"><span id="kmRestantes" class="eta-value">-- km</span><span class="eta-label">Distancia restante</span></div>
+                                <div class="eta-item"><span id="etaRestante" class="eta-value">-- min</span><span class="eta-label">ETA</span></div>
+                                <div class="eta-item"><span id="horaLlegada" class="eta-value">--:--</span><span class="eta-label">Llegada estimada</span></div>
+                                <div class="eta-item"><span id="avanceRuta" class="eta-value">--%</span><span class="eta-label">Avance de ruta</span></div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-block">
+                            <div class="time-box-inline">
+                                <span class="small-label">Tiempo de operación</span>
+                                <span id="horasRecorridoSidebar" class="big-value">00:00:00</span>
+                                <span class="small-sub">Desde 1° Akzo</span>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div class="ops-map-panel">
+                        <div class="map-panel-head">
+                            <div>
+                                <div class="section-mini-title">Recorrido oficial</div>
+                                <div class="direction-subtitle">Vista 3D de la ruta y posición actual</div>
+                            </div>
+                            <div class="text-end">
+                                <div id="horaGpsActual" class="live-gps-time">--:--:--</div>
+                                <div class="direction-subtitle">Último GPS</div>
+                            </div>
+                        </div>
+                        <div class="map-wrap">
+                            <div id="map3d"></div>
+                            <div id="mapMessage" class="map-message">Cargando mapa 3D...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- INDICADORES CLÁSICOS -->
+    <div class="row g-3 mb-4 classic-kpis-row">
+        <div class="col-md-4">
+            <div class="clock-box text-center">
+                <span class="kpi-label">Viajes Iniciados</span>
+                <div class="h1 mb-0" id="totalViajes">0</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="clock-box text-center">
+                <span class="kpi-label">Tiempo de Operación</span>
+                <div class="h1 mb-0" id="horasRecorrido" style="color: var(--accent);">00:00:00</div>
+                <span class="text-muted small">Desde 1° Akzo</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="clock-box text-center">
+                <span class="kpi-label">Última Sincronización</span>
+                <div class="h4 mt-2 mb-0" id="syncTime">--:--:--</div>
+                <button class="btn btn-link btn-sm text-decoration-none p-0 mt-1" onclick="consumirAPI()">Actualizar ahora</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTA DE VIAJES -->
+    <div id="mainContainer">
+        <div class="accordion" id="accViajes">
+            <div class="text-center py-5">
+                <div class="spinner-border text-success" role="status"></div>
+                <p class="mt-2 text-muted">Obteniendo datos del servidor...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ⚠️ Asegúrate de que esta URL sea la de tu implementación activa en Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbzUbC9vb1Jf33Jqa9M_u-KqjzblsfpX3kgJpb2ZSrDmdUMpO5FTw6bvt3quMNE1Qn9N/exec"; 
+
+    let inicioAkzoTimestamp = null;
+    let viajesActuales = 0;
+
+    let intervaloLive = null;
+    let ultimaClaveRutaMapa = null;
+
+    // ==========================================================
+    // MAPA 3D + RUTA EN VIVO
+    // ==========================================================
+    let mapa3D = null;
+    let marcadorCamion = null;
+    let marcadorAkzo = null;
+    let marcadorSli = null;
+    let mapaCargado = false;
+
+    const GEOJSON_VACIO = { type: 'FeatureCollection', features: [] };
+
+    function featureLinea(geometry) {
+        if (!geometry || !geometry.coordinates || !geometry.coordinates.length) return GEOJSON_VACIO;
+        return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry }] };
+    }
+
+    function inicializarMapa3D() {
+        if (mapa3D) return;
+
+        if (typeof maplibregl === 'undefined') {
+            const msg = document.getElementById('mapMessage');
+            if (msg) {
+                msg.textContent = 'Error cargando MapLibre. Recargá la página (Ctrl+F5).';
+                msg.classList.remove('hidden');
+            }
+            console.error('MapLibre no se cargó. Revisar CDN de maplibre-gl.');
+            return;
+        }
+
+        mapa3D = new maplibregl.Map({
+            container: 'map3d',
+            style: 'https://tiles.openfreemap.org/styles/liberty',
+            center: [-58.7017, -34.4304],
+            zoom: 14.2,
+            pitch: 58,
+            bearing: -28,
+            antialias: true,
+            attributionControl: true
+        });
+
+        mapa3D.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
+
+        mapa3D.on('load', () => {
+            mapaCargado = true;
+            const msg = document.getElementById('mapMessage');
+            if (msg) msg.classList.add('hidden');
+            agregarEdificios3D();
+
+            mapa3D.addSource('ruta-total', { type: 'geojson', data: GEOJSON_VACIO });
+            mapa3D.addLayer({
+                id: 'ruta-total-linea', type: 'line', source: 'ruta-total',
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: { 'line-color': '#64748b', 'line-width': 7, 'line-opacity': 0.55 }
+            });
+
+            mapa3D.addSource('ruta-restante', { type: 'geojson', data: GEOJSON_VACIO });
+            mapa3D.addLayer({
+                id: 'ruta-restante-linea', type: 'line', source: 'ruta-restante',
+                layout: { 'line-cap': 'round', 'line-join': 'round' },
+                paint: { 'line-color': '#00e676', 'line-width': 8, 'line-opacity': 0.95 }
+            });
+        });
+
+        mapa3D.on('error', (e) => {
+            console.warn('Error del mapa:', e && e.error ? e.error : e);
+            const msg = document.getElementById('mapMessage');
+            if (msg && !mapaCargado) {
+                msg.textContent = 'No se pudo cargar el mapa base. Revisá conexión/CDN y recargá la página.';
+                msg.classList.remove('hidden');
+            }
+        });
+
+        setTimeout(() => {
+            if (!mapaCargado) {
+                const msg = document.getElementById('mapMessage');
+                if (msg && msg.textContent === 'Cargando mapa 3D...') {
+                    msg.textContent = 'El mapa está tardando demasiado. Probá Ctrl+F5.';
+                }
+            }
+        }, 12000);
+    }
+
+    function agregarEdificios3D() {
+        try {
+            const layers = mapa3D.getStyle().layers || [];
+            const buildingLayer = layers.find(l => l['source-layer'] === 'building');
+            if (!buildingLayer || mapa3D.getLayer('edificios-3d')) return;
+            const labelLayer = layers.find(l => l.type === 'symbol' && l.layout && l.layout['text-field']);
+
+            mapa3D.addLayer({
+                id: 'edificios-3d',
+                source: buildingLayer.source,
+                'source-layer': 'building',
+                type: 'fill-extrusion',
+                minzoom: 13,
+                paint: {
+                    'fill-extrusion-color': '#334155',
+                    'fill-extrusion-height': ['coalesce', ['to-number', ['get', 'render_height']], ['to-number', ['get', 'height']], 8],
+                    'fill-extrusion-base': ['coalesce', ['to-number', ['get', 'render_min_height']], ['to-number', ['get', 'min_height']], 0],
+                    'fill-extrusion-opacity': 0.72
+                }
+            }, labelLayer ? labelLayer.id : undefined);
+        } catch (e) {
+            console.warn('No se pudo activar edificios 3D:', e);
+        }
+    }
+
+    function crearMarcadorPlanta(nombre, coord, tipo) {
+        if (!coord || !Number.isFinite(Number(coord.lon)) || !Number.isFinite(Number(coord.lat))) return null;
+        const el = document.createElement('div');
+        el.className = 'map-plant-marker';
+        el.innerHTML = `${tipo === 'AKZO' ? '🏭' : '📦'} ${nombre}`;
+        return new maplibregl.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat([Number(coord.lon), Number(coord.lat)])
+            .addTo(mapa3D);
+    }
+
+    function asegurarMarcadoresPlantas(plantas) {
+        if (!mapa3D || !plantas) return;
+        if (!marcadorAkzo && plantas.AKZO) marcadorAkzo = crearMarcadorPlanta('AKZO', plantas.AKZO, 'AKZO');
+        if (!marcadorSli && plantas.SLI) marcadorSli = crearMarcadorPlanta('SLI', plantas.SLI, 'SLI');
+    }
+
+    function actualizarMarcadorCamion(estado) {
+        if (!mapa3D || !estado) return;
+
+        const proyectado = estado.ruta && estado.ruta.puntoProyectado ? estado.ruta.puntoProyectado : null;
+        const lat = proyectado ? Number(proyectado.lat) : Number(estado.lat);
+        const lon = proyectado ? Number(proyectado.lon) : Number(estado.lon);
+
+        if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+
+        if (!marcadorCamion) {
+            const el = document.createElement('div');
+            el.className = 'map-truck-marker';
+            el.innerHTML = '<div class="map-truck-inner">🚚</div>';
+            marcadorCamion = new maplibregl.Marker({ element: el, anchor: 'center' })
+                .setLngLat([lon, lat])
+                .addTo(mapa3D);
+        } else {
+            marcadorCamion.setLngLat([lon, lat]);
+        }
+
+        // El emoji normalmente mira a la izquierda. Lo invertimos cuando el destino es SLI.
+        const inner = marcadorCamion.getElement().querySelector('.map-truck-inner');
+        if (inner) inner.style.transform = estado.destino === 'SLI' ? 'scaleX(-1)' : 'scaleX(1)';
+    }
+
+    function actualizarFuentesRuta(ruta) {
+        if (!mapa3D || !mapaCargado) return;
+        const totalSource = mapa3D.getSource('ruta-total');
+        const restanteSource = mapa3D.getSource('ruta-restante');
+
+        if (!ruta) {
+            totalSource && totalSource.setData(GEOJSON_VACIO);
+            restanteSource && restanteSource.setData(GEOJSON_VACIO);
+            return;
+        }
+
+        totalSource && totalSource.setData(featureLinea(ruta.geometriaTotal));
+        restanteSource && restanteSource.setData(featureLinea(ruta.geometriaRestante));
+
+        const coords = ruta.geometriaTotal && ruta.geometriaTotal.coordinates;
+        if (coords && coords.length > 1) {
+            const first = coords[0];
+            const last = coords[coords.length - 1];
+            const claveRuta = `${coords.length}|${first[0].toFixed(5)},${first[1].toFixed(5)}|${last[0].toFixed(5)},${last[1].toFixed(5)}`;
+
+            // En el replay el camión se mueve muy rápido. No volvemos a encuadrar
+            // el mapa en cada punto; solo cuando cambia el sentido/ruta oficial.
+            if (claveRuta !== ultimaClaveRutaMapa) {
+                ultimaClaveRutaMapa = claveRuta;
+                const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
+                mapa3D.fitBounds(bounds, {
+                    padding: { top: 38, bottom: 38, left: 42, right: 42 },
+                    duration: 1100,
+                    maxZoom: 15.35,
+                    pitch: 52,
+                    bearing: -20
+                });
+            }
+        }
+    }
+
+    function formatDistancia(km) {
+        const n = Number(km);
+        if (!Number.isFinite(n)) return '--';
+        if (n < 1) return `${Math.round(n * 1000)} m`;
+        return `${n.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} km`;
+    }
+
+    function actualizarPanelEnVivo(estado) {
+        if (!estado) return;
+
+        const estadoEl = document.getElementById('estadoGpsActual');
+        const detalleEl = document.getElementById('detalleDireccion');
+        const horaEl = document.getElementById('horaGpsActual');
+        const routeFillEl = document.getElementById('routeFill');
+        const truckEl = document.getElementById('truckProgress');
+        const truckTextEl = document.getElementById('truckPercent');
+        const truckIconEl = truckEl.querySelector('.truck-icon');
+        const fuenteEl = document.getElementById('rutaFuente');
+        const desvioEl = document.getElementById('desvioRuta');
+
+        estadoEl.innerText = `🚚 ${estado.estado || 'GPS SIN ESTADO'}`;
+        horaEl.innerText = estado.horaGps || '--:--:--';
+        horaEl.classList.toggle('gps-warning', !!estado.gpsAtrasado);
+
+        if (estado.gpsAtrasado) {
+            detalleEl.innerText = `⚠ GPS sin actualizar hace ${estado.antiguedadGpsMin} min`;
+            detalleEl.classList.add('gps-warning');
+        } else if (estado.horaSalida && estado.destino) {
+            detalleEl.innerText = `Salida ${estado.origen}: ${estado.horaSalida} · Próximo destino: ${estado.destino}`;
+            detalleEl.classList.remove('gps-warning');
+        } else {
+            detalleEl.innerText = estado.zona ? `Ubicación actual: ${estado.zona}` : 'Posición GPS disponible';
+            detalleEl.classList.remove('gps-warning');
+        }
+
+        asegurarMarcadoresPlantas(estado.plantas);
+        actualizarMarcadorCamion(estado);
+
+        // La barra siempre conserva físicamente AKZO a la izquierda y SLI a la derecha.
+        document.getElementById('origenRutaLabel').innerText = 'AKZO';
+        document.getElementById('destinoRutaLabel').innerText = 'SLI';
+
+        const ruta = estado.ruta;
+        const rutaMapa = ruta || estado.rutaReferencia || null;
+        const zonaUpper = String(estado.zona || '').toUpperCase();
+        const estaEnSli = zonaUpper.includes('SLI');
+        const estaEnAkzo = zonaUpper.includes('AKZO') || zonaUpper.includes('BALANZA') || zonaUpper.includes('CARGA');
+        const vaASli = !!ruta && estado.destino === 'SLI';
+        const posMin = 1.5;
+        const posMax = 98.5;
+        const scalePos = (pct) => posMin + ((posMax - posMin) * (pct / 100));
+
+        fuenteEl.innerText = 'Ruta oficial GPS 7 días';
+        fuenteEl.className = 'route-chip ok';
+
+        if (ruta) {
+            const avance = Math.max(0, Math.min(100, Number(ruta.porcentajeAvance || 0)));
+            const posicionBarra = vaASli ? avance : (100 - avance);
+
+            routeFillEl.style.width = `${avance}%`;
+            routeFillEl.style.left = vaASli ? '0' : 'auto';
+            routeFillEl.style.right = vaASli ? 'auto' : '0';
+
+            truckEl.style.left = `${scalePos(posicionBarra)}%`;
+            truckTextEl.innerText = estado.estado || 'EN RUTA';
+            truckIconEl.style.transform = vaASli ? 'scaleX(-1)' : 'scaleX(1)';
+
+            document.getElementById('kmRestantes').innerText = formatDistancia(ruta.distanciaRestanteKm);
+            document.getElementById('etaRestante').innerText = `${ruta.etaMin} min`;
+            document.getElementById('horaLlegada').innerText = ruta.llegadaEstimada || '--:--';
+            document.getElementById('avanceRuta').innerText = `${avance.toFixed(0)}%`;
+
+            const desvio = Number(ruta.distanciaFueraRutaM);
+            if (ruta.fueraDeRuta) {
+                desvioEl.innerText = `⚠ Fuera de ruta · ${Math.round(desvio)} m`;
+                desvioEl.className = 'route-chip warn';
+            } else if (Number.isFinite(desvio)) {
+                desvioEl.innerText = `GPS a ${Math.round(desvio)} m de la ruta`;
+                desvioEl.className = 'route-chip ok';
+            } else {
+                desvioEl.innerText = 'Sobre ruta oficial';
+                desvioEl.className = 'route-chip ok';
+            }
+        } else {
+            routeFillEl.style.left = '0';
+            routeFillEl.style.right = 'auto';
+
+            if (estaEnSli) {
+                routeFillEl.style.width = '100%';
+                truckEl.style.left = `${posMax}%`;
+                truckIconEl.style.transform = 'scaleX(-1)';
+                truckTextEl.innerText = estado.zona || 'SLI';
+            } else if (estaEnAkzo) {
+                routeFillEl.style.width = '0%';
+                truckEl.style.left = `${posMin}%`;
+                truckIconEl.style.transform = 'scaleX(1)';
+                truckTextEl.innerText = estado.zona || 'AKZO';
+            } else {
+                routeFillEl.style.width = '0%';
+                truckEl.style.left = '50%';
+                truckIconEl.style.transform = 'scaleX(1)';
+                truckTextEl.innerText = estado.estado || '--';
+            }
+
+            document.getElementById('kmRestantes').innerText = '--';
+            document.getElementById('etaRestante').innerText = '--';
+            document.getElementById('horaLlegada').innerText = '--:--';
+            document.getElementById('avanceRuta').innerText = '--%';
+            desvioEl.innerText = estaEnSli || estaEnAkzo ? 'Camión en planta' : 'Esperando ruta';
+            desvioEl.className = 'route-chip';
+        }
+
+        if (mapaCargado) actualizarFuentesRuta(rutaMapa);
+        else if (mapa3D) mapa3D.once('load', () => actualizarFuentesRuta(rutaMapa));
+    }
+
+    // 1. RELOJ DIGITAL
+    function actualizarReloj() {
+        const ahora = new Date();
+        document.getElementById('reloj').innerText = new Intl.DateTimeFormat('es-AR', {
+            timeZone: 'America/Argentina/Buenos_Aires',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+        }).format(ahora);
+    }
+    setInterval(actualizarReloj, 1000);
+
+    // 2. CRONÓMETRO Y PROYECCIÓN
+    function correrCronometro() {
+        if (!inicioAkzoTimestamp) return;
+
+        const ahora = new Date().getTime();
+        const difMs = ahora - inicioAkzoTimestamp;
+        if (difMs < 0) return;
+
+        // Cronómetro
+        const totalSegundos = Math.floor(difMs / 1000);
+        const horas = Math.floor(totalSegundos / 3600);
+        const minutos = Math.floor((totalSegundos % 3600) / 60);
+        const segundos = totalSegundos % 60;
+        const str = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        
+        const ind = document.getElementById('horasRecorrido');
+        const indSidebar = document.getElementById('horasRecorridoSidebar');
+        ind.innerText = str;
+        if (indSidebar) indSidebar.innerText = str;
+        const colorOperacion = horas >= 11 ? "var(--danger)" : (horas >= 9 ? "var(--warning)" : "var(--accent)");
+        ind.style.color = colorOperacion;
+        if (indSidebar) indSidebar.style.color = colorOperacion;
+
+        // Llamar a la proyección dinámica
+        calcularProyeccion(difMs);
+    }
+    setInterval(correrCronometro, 1000);
+
+    // 3. LÓGICA DE PROYECCIÓN (Se actualiza cada segundo para ver si el ritmo decae)
+    function calcularProyeccion(difMs = null) {
+        const objetivo = parseInt(document.getElementById('objetivoViajes').value) || 1;
+        const barra = document.getElementById('barraProgreso');
+        
+        // Actualizar UI de la barra
+        let porcentaje = Math.min((viajesActuales / objetivo) * 100, 100);
+        barra.style.width = `${porcentaje}%`;
+        barra.innerText = `${viajesActuales} / ${objetivo} Viajes`;
+
+        if (viajesActuales >= objetivo) {
+            barra.classList.replace('bg-success', 'bg-info');
+            document.getElementById('estadoProyeccion').innerHTML = `<span class="text-info"><i class="bi bi-trophy-fill"></i> ¡Objetivo cumplido!</span>`;
+            return;
+        }
+
+        if (!inicioAkzoTimestamp || !difMs || viajesActuales === 0) return;
+
+        // Matemáticas de la proyección
+        const minutosTranscurridos = difMs / 60000;
+        const ritmoMinutosPorViaje = minutosTranscurridos / viajesActuales;
+        const minutosRestantesEstimados = (objetivo - viajesActuales) * ritmoMinutosPorViaje;
+        const minutosTotalesEstimados = minutosTranscurridos + minutosRestantesEstimados;
+
+        document.getElementById('ritmoActual').innerHTML = `<i class="bi bi-stopwatch"></i> Ritmo: ${Math.round(ritmoMinutosPorViaje)} min / viaje`;
+
+        const estadoUI = document.getElementById('estadoProyeccion');
+        const limiteTurnoMinutos = 12 * 60; // 12 horas
+
+        if (minutosTotalesEstimados <= limiteTurnoMinutos) {
+            // Llegamos bien
+            const holgura = limiteTurnoMinutos - minutosTotalesEstimados;
+            estadoUI.innerHTML = `<span style="color: var(--accent);"><i class="bi bi-check-circle-fill"></i> Proyección OK. Terminarás con ${Math.floor(holgura/60)}h ${Math.round(holgura%60)}m de sobra.</span>`;
+            estadoUI.style.borderColor = "var(--accent)";
+        } else {
+            // No llegamos
+            const falta = minutosTotalesEstimados - limiteTurnoMinutos;
+            estadoUI.innerHTML = `<span style="color: var(--danger);"><i class="bi bi-exclamation-triangle-fill"></i> Alerta: Faltarían ${Math.floor(falta/60)}h ${Math.round(falta%60)}m extra para cumplir.</span>`;
+            estadoUI.style.borderColor = "var(--danger)";
+        }
+    }
+
+
+    function escaparHtml(valor) {
+        return String(valor == null ? '' : valor)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function actualizarProgramacionTMS(tms) {
+        const resumen = document.getElementById('tmsResumen');
+        const cont = document.getElementById('tmsCamiones');
+
+        if (!tms) {
+            resumen.innerText = 'Sin información TMS.';
+            cont.innerHTML = '';
+            return;
+        }
+
+        if (tms.error) {
+            resumen.innerHTML = `<span class="tms-error">⚠ ${escaparHtml(tms.error)}</span>`;
+            cont.innerHTML = '';
+            return;
+        }
+
+        resumen.innerText = `${tms.fecha} · ${tms.totalViajes} viajes programados · ${tms.totalCamiones} camión${Number(tms.totalCamiones) === 1 ? '' : 'es'}${tms.ultimaConsulta ? ' · TMS ' + tms.ultimaConsulta.slice(11,16) : ''}`;
+
+        if (tms.advertencia) {
+            resumen.innerHTML += ` <span class="tms-error">· ⚠ usando última programación guardada</span>`;
+        }
+
+        // El TMS pasa a ser la fuente del objetivo del turno.
+        if (Number(tms.totalViajes) > 0) {
+            document.getElementById('objetivoViajes').value = Number(tms.totalViajes);
+            calcularProyeccion();
+        }
+
+        if (!Array.isArray(tms.camiones) || tms.camiones.length === 0) {
+            cont.innerHTML = `<div class="text-muted small">No hay camiones Shuttle programados para ${escaparHtml(tms.fecha)}.</div>`;
+            return;
+        }
+
+        cont.innerHTML = tms.camiones.map(c => {
+            const horarios = (c.viajes || [])
+                .map(v => `<span class="tms-hour">${escaparHtml(String(v.horarioCarga || '--:--').slice(0,5))}</span>`)
+                .join('');
+
+            const estados = [...new Set((c.viajes || []).map(v => v.estado).filter(Boolean))].join(' / ');
+
+            return `
+                <article class="tms-truck">
+                    <div class="tms-truck-head">
+                        <div class="tms-patente">🚚 ${escaparHtml(c.patente)}</div>
+                        <div class="tms-count">${Number(c.cantidadViajes || 0)} viajes</div>
+                    </div>
+                    <div class="tms-detail">${escaparHtml(c.chofer || 'Chofer sin asignar')}</div>
+                    <div class="tms-detail">${estados ? 'Estado: ' + escaparHtml(estados) : 'Estado: sin definir'}</div>
+                    <div class="tms-hours">${horarios}</div>
+                </article>`;
+        }).join('');
+    }
+
+    function fechaTmsSeleccionada() {
+        return document.getElementById('tmsFecha')?.value || '';
+    }
+
+    function urlApiVivo(forzarTms = false) {
+        const fecha = fechaTmsSeleccionada();
+        const sep = API_URL.includes('?') ? '&' : '?';
+
+        let url = fecha
+            ? `${API_URL}${sep}fechaTms=${encodeURIComponent(fecha)}`
+            : `${API_URL}${sep}`;
+
+        if (forzarTms) {
+            url += `${url.includes('?') && !url.endsWith('?') ? '&' : ''}forzarTms=1`;
+        }
+
+        url += `${url.includes('?') && !url.endsWith('?') ? '&' : ''}_=${Date.now()}`;
+
+        return url;
+    }
+
+    function consultarTMSSeleccionado() {
+        consumirAPI(true);
+    }
+
+    // 4. CONSUMO DE API (Apps Script)
+    async function consumirAPI(forzarTms = false) {
+        const container = document.getElementById('mainContainer');
+        container.classList.add('loading-overlay');
+
+        try {
+            const response = await fetch(urlApiVivo(forzarTms), { cache: 'no-store' });
+            const data = await response.json();
+            
+            inicioAkzoTimestamp = data.resumen.inicioAkzoTimestamp;
+            viajesActuales = data.resumen.totalViajes;
+            
+            document.getElementById('totalViajes').innerText = viajesActuales;
+            document.getElementById('syncTime').innerText = data.resumen.ultimaActualizacion;
+            const syncHeader = document.getElementById('syncTimeHeader');
+            if (syncHeader) syncHeader.innerText = data.resumen.ultimaActualizacion;
+
+            actualizarProgramacionTMS(data.programacionTms || null);
+            actualizarPanelEnVivo(data.estadoActual || null);
+
+            const acc = document.getElementById('accViajes');
+            acc.innerHTML = "";
+
+            if(data.viajesAgrupados.length === 0) {
+                acc.innerHTML = `<div class="text-center text-muted py-4">No hay datos de viajes registrados para hoy todavía.</div>`;
+            }
+
+            data.viajesAgrupados.forEach((v, idx) => {
+                const isFirst = idx === 0 ? 'show' : '';
+                const isCollapsed = idx === 0 ? '' : 'collapsed';
+
+                acc.innerHTML += `
+                <div class="accordion-item shadow-sm">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button ${isCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#v${v.id}">
+                            <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                                <div>
+                                    <span class="fs-5 fw-bold" style="color:var(--accent)">Viaje #${v.id}</span>
+                                    <div class="small text-muted fw-normal">${v.inicio} a ${v.fin}</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-dark border border-secondary p-2 fs-6">${v.duracionTotal} min</span>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="v${v.id}" class="accordion-collapse collapse ${isFirst}" data-bs-parent="#accViajes">
+                        <div class="accordion-body bg-dark rounded-bottom-3 p-4">
+                            <ul class="timeline mb-0">
+                                ${v.eventos.map(e => {
+                                    let cls = e.movimiento.includes("Ruta") ? "ruta" : 
+                                              (e.movimiento.includes("Puerta") || e.movimiento.includes("Entrada") || e.movimiento.includes("Salida") ? "puerta" : "carga");
+                                    return `
+                                    <li class="timeline-item ${cls}">
+                                        <div class="timeline-dot"></div>
+                                        <div class="timeline-content">
+                                            <div>
+                                                <div class="event-name">${e.movimiento}</div>
+                                                <div class="event-time">${e.inicio} a ${e.fin}</div>
+                                            </div>
+                                            <span class="badge bg-dark border border-secondary">${e.minutos}m</span>
+                                        </div>
+                                    </li>`;
+                                }).reverse().join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            // Forzar actualización visual de progreso
+            calcularProyeccion();
+
+        } catch (e) {
+            console.error("Error API:", e);
+        } finally {
+            container.classList.remove('loading-overlay');
+        }
+    }
+
+    // Inicialización producción
+    window.onload = () => {
+        actualizarReloj();
+
+        // Siempre arrancamos con la fecha local del navegador.
+        // Mañana 14/09 se seleccionará 14/09 automáticamente.
+        const hoyLocal = new Date();
+        const yyyy = hoyLocal.getFullYear();
+        const mm = String(hoyLocal.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoyLocal.getDate()).padStart(2, '0');
+        document.getElementById('tmsFecha').value = `${yyyy}-${mm}-${dd}`;
+
+        inicializarMapa3D();
+        consumirAPI(false);
+
+        // La hoja GPS también se actualiza por trigger cada 5 min.
+        // La web refresca al mismo ritmo.
+        intervaloLive = setInterval(() => consumirAPI(false), 60000);
+    };
+</script>
+</body>
+</html>
