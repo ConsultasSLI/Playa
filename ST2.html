@@ -875,16 +875,15 @@
             return;
         }
 
-        mapa3D = new maplibregl.Map({
-            container: 'map3d',
-            style: 'https://tiles.openfreemap.org/styles/liberty',
-            center: [-58.7017, -34.4304],
-            zoom: 14.2,
-            pitch: 58,
-            bearing: -28,
-            antialias: true,
-            attributionControl: true
-        });
+mapa3D = new maplibregl.Map({
+    container: 'map3d',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    center: [-58.69073714, -34.44086848],
+    zoom: 13.73223,
+    pitch: 52,
+    bearing: -20,
+    antialias: true
+});
 
         mapa3D.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
 
@@ -1019,13 +1018,13 @@
             if (claveRuta !== ultimaClaveRutaMapa) {
                 ultimaClaveRutaMapa = claveRuta;
                 const bounds = coords.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(coords[0], coords[0]));
-                mapa3D.fitBounds(bounds, {
-                    padding: { top: 38, bottom: 38, left: 42, right: 42 },
-                    duration: 1100,
-                    maxZoom: 15.35,
-                    pitch: 52,
-                    bearing: -20
-                });
+     mapa3D.easeTo({
+    center: [-58.69073714, -34.44086848],
+    zoom: 13.73223,
+    bearing: -20,
+    pitch: 52,
+    duration: 1100
+});
             }
         }
     }
