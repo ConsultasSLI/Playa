@@ -5,57 +5,848 @@
 <title>Logística Interplanta · Shuttle</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.css">
 <style>
-:root{--bg:#0a0e17;--card:#121b2a;--border:#2a3b55;--green:#00e676;--gray:#64748b;--text:#fff;--dim:#cbd5e1;--cyan:#00b8d4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.wrap{max-width:1450px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.card{background:var(--card);border:1px solid var(--border);border-radius:14px}.head{padding:16px 18px}.title{font-size:28px}.muted{color:var(--dim);font-size:12px}.clock{font-size:28px;font-weight:800;color:var(--green)}.planner{padding:14px 18px;border-bottom:1px solid var(--border)}.progress{height:22px;background:#1f2a3d;border-radius:6px;overflow:hidden;display:flex;position:relative}.seg-ok{background:#259b61}.seg-run{background:var(--cyan)}.seg-pend{background:#1f2a3d}.progress span{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:13px}.routeStrip{padding:16px 28px;border-bottom:1px solid var(--border)}.routeLine{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:12px}.ep{text-align:center;font-weight:900}.rail{height:8px;background:#334155;border-radius:999px;position:relative}.remain{position:absolute;top:0;bottom:0;background:var(--green);border-radius:999px;box-shadow:0 0 10px #00e67666}.truck{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:6;transition:left .6s ease;pointer-events:none}.truck img{display:block;width:92px;height:auto;max-width:none;filter:drop-shadow(0 3px 5px rgba(0,0,0,.55))}.truckLabel{display:none;position:absolute;top:27px;transform:translateX(-50%);background:#0a0e17;border:1px solid var(--border);border-radius:10px;padding:3px 8px;font-size:11px;white-space:nowrap}.grid{display:grid;grid-template-columns:330px 1fr;min-height:520px}.side{padding:18px;border-right:1px solid var(--border)}.status{font-size:28px;font-weight:900;color:var(--green);margin:6px 0}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:20px}.kpi{background:#141d2e;padding:16px;text-align:center}.kpi b{display:block;font-size:25px}.kpi small{color:var(--dim)}.controls{display:none!important}select{width:100%;background:#0f172a;color:#fff;border:1px solid var(--border);border-radius:8px;padding:9px}.debug{margin-top:14px;font:12px/1.5 Consolas,monospace;background:#0b1220;padding:10px;border-radius:8px;color:#dbeafe;white-space:pre-wrap}#map{width:100%;height:520px}.mapwrap{position:relative}.badge{position:absolute;left:12px;bottom:12px;z-index:5;background:#0b1220e8;border:1px solid var(--border);padding:7px 10px;border-radius:8px;font-size:12px}.markerTruck{width:58px!important;height:58px!important;min-width:58px!important;min-height:58px!important;max-width:58px!important;max-height:58px!important;border-radius:50%;background:rgba(232,238,245,.96);border:3px solid #414FB1;box-shadow:0 0 0 7px rgba(65,79,177,.12),0 8px 18px rgba(0,0,0,.30);display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none;user-select:none}.markerTruck .mapTruckImg{display:block!important;width:42px!important;height:auto!important;max-width:42px!important;max-height:26px!important;object-fit:contain!important;object-position:center!important;transform:none!important}.plant{background:#0b1220ee;border:2px solid var(--green);padding:7px 10px;border-radius:9px;font-weight:900}@media(max-width:900px){.grid{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--border)}#map{height:420px}}.simbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.simbar button{background:#0f172a;color:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer}.simbar button.active{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset;color:var(--green)}.simnote{margin-top:8px;color:var(--dim);font-size:11px}.trips{margin-top:16px}.trip{background:#151c2c;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}.trip-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer}.trip-title{font-size:18px;font-weight:900;color:var(--green)}.trip-sub{font-size:12px;color:var(--dim);margin-top:2px}.trip-badge{background:#0b1220;border:1px solid #64748b;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:800}.trip-body{display:none;padding:14px 18px 16px;border-top:1px solid var(--border);background:#0f172a}.trip.open .trip-body{display:block}.timeline{list-style:none;margin:0;padding:0 0 0 24px;border-left:2px solid #40516e}.timeline li{position:relative;margin-bottom:12px}.timeline li:last-child{margin-bottom:0}.timeline li:before{content:"";position:absolute;left:-31px;top:8px;width:14px;height:14px;border-radius:50%;background:#64748b;border:3px solid #0f172a}.timeline li.ruta:before{background:#3b82f6}.timeline li.carga:before{background:#22c55e}.timeline li.puerta:before{background:#f59e0b}.event{display:flex;justify-content:space-between;gap:12px;background:#182235;border:1px solid #2d405e;border-radius:9px;padding:10px 12px}.event-name{font-weight:800}.event-time{font-size:12px;color:var(--dim);margin-top:3px}.section-title{margin-top:18px;margin-bottom:10px;font-size:13px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:.5px}.planner-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:10px;font-size:13px;font-weight:800}.rhythm{color:var(--cyan)}.projection{color:var(--green);text-align:right}.projection.warn{color:#f59e0b}.operation-time{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}.operation-box{background:#141d2e;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}.operation-label{font-size:10px;font-weight:900;letter-spacing:1.2px}.operation-value{font-size:30px;line-height:1.15;color:var(--green);margin-top:7px;font-variant-numeric:tabular-nums}.operation-sub{margin-top:6px;color:#64748b;font-size:11px}.live-now,.live-duration{font-variant-numeric:tabular-nums}.plant-media-wrap{display:none;z-index:20;pointer-events:none;user-select:none}.plant-media-wrap.show{display:block}.plant-media-card{position:relative;width:330px;background:#050b14;border:2px solid var(--green);border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.42),0 0 18px rgba(0,230,118,.16);transform:scale(var(--plant-media-scale,.72));transform-origin:center center;transition:transform .18s ease}.plant-media-wrap.balanza .plant-media-card{width:350px}.plant-media-video{display:none;width:100%;aspect-ratio:16/8.5;object-fit:cover;background:#050b14}.plant-media-image{display:none;width:100%;aspect-ratio:4/3;object-fit:cover;background:#fff}.plant-media-video.show,.plant-media-image.show{display:block}.plant-media-badge{position:absolute;left:10px;bottom:9px;z-index:22;background:rgba(5,12,24,.90);color:#fff;border:1px solid #334155;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:900;letter-spacing:.25px}@media(max-width:900px){.plant-media-card{width:280px}.plant-media-wrap.balanza .plant-media-card{width:300px}}
+:root{--bg:#0a0e17;--card:#121b2a;--border:#2a3b55;--green:#00e676;--gray:#64748b;--text:#fff;--dim:#cbd5e1;--cyan:#00b8d4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}.wrap{max-width:1450px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.card{background:var(--card);border:1px solid var(--border);border-radius:14px}.head{padding:16px 18px}.title{font-size:28px}.muted{color:var(--dim);font-size:12px}.clock{font-size:28px;font-weight:800;color:var(--green)}.planner{padding:14px 18px;border-bottom:1px solid var(--border)}.progress{height:22px;background:#1f2a3d;border-radius:6px;overflow:hidden;display:flex;position:relative}.seg-ok{background:#259b61}.seg-run{background:var(--cyan)}.seg-pend{background:#1f2a3d}.progress span{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:13px}.routeStrip{padding:16px 28px;border-bottom:1px solid var(--border)}.routeLine{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:12px}.ep{text-align:center;font-weight:900}.rail{height:8px;background:#334155;border-radius:999px;position:relative}.remain{position:absolute;top:0;bottom:0;background:var(--green);border-radius:999px;box-shadow:0 0 10px #00e67666}.truck{
+  position:absolute;
+  top:50%;
+  transform:translate(-50%,-50%);
+  z-index:6;
+  transition:left .6s ease;
+  pointer-events:none;
+}
+.truck img{
+  display:block;
+  width:92px;
+  height:auto;
+  max-width:none;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,.55));
+}
+.truckLabel{display:none;position:absolute;top:27px;transform:translateX(-50%);background:#0a0e17;border:1px solid var(--border);border-radius:10px;padding:3px 8px;font-size:11px;white-space:nowrap}.grid{display:grid;grid-template-columns:330px 1fr;min-height:520px}.side{padding:18px;border-right:1px solid var(--border)}.status{font-size:28px;font-weight:900;color:var(--green);margin:6px 0}.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:20px}.kpi{background:#141d2e;padding:16px;text-align:center}.kpi b{display:block;font-size:25px}.kpi small{color:var(--dim)}.controls{display:none!important}select{width:100%;background:#0f172a;color:#fff;border:1px solid var(--border);border-radius:8px;padding:9px}.debug{margin-top:14px;font:12px/1.5 Consolas,monospace;background:#0b1220;padding:10px;border-radius:8px;color:#dbeafe;white-space:pre-wrap}#map{width:100%;height:520px}.mapwrap{position:relative}.badge{position:absolute;left:12px;bottom:12px;z-index:5;background:#0b1220e8;border:1px solid var(--border);padding:7px 10px;border-radius:8px;font-size:12px}.markerTruck{
+  width:58px !important;
+  height:58px !important;
+  min-width:58px !important;
+  min-height:58px !important;
+  max-width:58px !important;
+  max-height:58px !important;
+  border-radius:50%;
+  background:rgba(232,238,245,.96);
+  border:3px solid #414FB1;
+  box-shadow:
+    0 0 0 7px rgba(65,79,177,.12),
+    0 8px 18px rgba(0,0,0,.30);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  pointer-events:none;
+  user-select:none;
+}
+
+.markerTruck .mapTruckImg{
+  display:block !important;
+  width:42px !important;
+  height:auto !important;
+  max-width:42px !important;
+  max-height:26px !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  transform:none !important;
+}.plant{background:#0b1220ee;border:2px solid var(--green);padding:7px 10px;border-radius:9px;font-weight:900}@media(max-width:900px){.grid{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--border)}#map{height:420px}}
+
+.simbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.simbar button{background:#0f172a;color:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-weight:700;cursor:pointer}
+.simbar button.active{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset;color:var(--green)}
+.simnote{margin-top:8px;color:var(--dim);font-size:11px}
+
+
+.trips{margin-top:16px}
+.trip{background:#151c2c;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.trip-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer}
+.trip-title{font-size:18px;font-weight:900;color:var(--green)}
+.trip-sub{font-size:12px;color:var(--dim);margin-top:2px}
+.trip-badge{background:#0b1220;border:1px solid #64748b;border-radius:8px;padding:6px 9px;font-size:12px;font-weight:800}
+.trip-body{display:none;padding:14px 18px 16px;border-top:1px solid var(--border);background:#0f172a}
+.trip.open .trip-body{display:block}
+.timeline{list-style:none;margin:0;padding:0 0 0 24px;border-left:2px solid #40516e}
+.timeline li{position:relative;margin-bottom:12px}
+.timeline li:last-child{margin-bottom:0}
+.timeline li:before{content:"";position:absolute;left:-31px;top:8px;width:14px;height:14px;border-radius:50%;background:#64748b;border:3px solid #0f172a}
+.timeline li.ruta:before{background:#3b82f6}.timeline li.carga:before{background:#22c55e}.timeline li.puerta:before{background:#f59e0b}
+.event{display:flex;justify-content:space-between;gap:12px;background:#182235;border:1px solid #2d405e;border-radius:9px;padding:10px 12px}
+.event-name{font-weight:800}.event-time{font-size:12px;color:var(--dim);margin-top:3px}
+.section-title{margin-top:18px;margin-bottom:10px;font-size:13px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:.5px}
+.planner-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-top:10px;font-size:13px;font-weight:800}
+.rhythm{color:var(--cyan)}
+.projection{color:var(--green);text-align:right}
+.projection.warn{color:#f59e0b}
+.operation-time{margin-top:18px;padding-top:18px;border-top:1px solid var(--border)}
+.operation-box{background:#141d2e;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.operation-label{font-size:10px;font-weight:900;letter-spacing:1.2px}
+.operation-value{font-size:30px;line-height:1.15;color:var(--green);margin-top:7px;font-variant-numeric:tabular-nums}
+.operation-sub{margin-top:6px;color:#64748b;font-size:11px}
+.live-now,.live-duration{font-variant-numeric:tabular-nums}
+
+
+
+.plant-media-wrap{
+  display:none;
+  z-index:20;
+  pointer-events:none;
+  user-select:none;
+}
+
+.plant-media-wrap.show{
+  display:block;
+}
+
+.plant-media-card{
+  position:relative;
+  width:330px;
+  background:#050b14;
+  border:2px solid var(--green);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.42),
+    0 0 18px rgba(0,230,118,.16);
+  transform:scale(var(--plant-media-scale,.72));
+  transform-origin:center center;
+  transition:transform .18s ease;
+}
+
+.plant-media-wrap.balanza .plant-media-card{
+  width:350px;
+}
+
+.plant-media-video{
+  display:none;
+  width:100%;
+  aspect-ratio:16/8.5;
+  object-fit:cover;
+  background:#050b14;
+}
+
+.plant-media-image{
+  display:none;
+  width:100%;
+  aspect-ratio:4/3;
+  object-fit:cover;
+  background:#fff;
+}
+
+.plant-media-video.show,
+.plant-media-image.show{
+  display:block;
+}
+
+.plant-media-badge{
+  position:absolute;
+  left:10px;
+  bottom:9px;
+  z-index:22;
+  background:rgba(5,12,24,.90);
+  color:#fff;
+  border:1px solid #334155;
+  border-radius:8px;
+  padding:6px 10px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.25px;
+}
+
+@media(max-width:900px){
+  .plant-media-card{
+    width:280px;
+  }
+
+  .plant-media-wrap.balanza .plant-media-card{
+    width:300px;
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="wrap"><div class="top"><div><div class="title">Logística Interplanta</div><div class="muted">🟢 Monitor de Flota en Vivo</div></div><div class="card head" style="display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:center;text-align:center"><div><div class="muted">HORA ACTUAL</div><div id="clock" class="clock">--:--:--</div></div><div><div class="muted">ÚLTIMA SINCRONIZACIÓN</div><div id="sync" style="font-size:16px;font-weight:900;margin-top:4px">--:--:--</div></div></div></div>
 <div class="card"><div class="planner"><div style="display:flex;justify-content:space-between"><b style="color:var(--green)">⏱ PLANIFICADOR DE TURNO (12 HS)</b><b>Viajes programados TMS: <span id="prog">0</span></b></div><div class="progress" style="margin-top:10px"><div id="ok" class="seg-ok"></div><div id="run" class="seg-run"></div><div id="pend" class="seg-pend"></div><span id="barTxt">--</span></div><div class="planner-footer"><div id="ritmoActual" class="rhythm">⏱ Ritmo: -- min / viaje</div><div id="proyeccionTurno" class="projection">Proyección: esperando datos...</div></div></div>
-<div class="routeStrip"><div class="routeLine"><div class="ep">AKZO</div><div class="rail"><div id="remainRail" class="remain"></div><div id="truckRail" class="truck"><img id="truckRailImg" src="https://consultassli.github.io/Playa/assets/camion_barra_hacia_sli.png" alt="Camión Grupo SLI"></div><div id="truckRailLabel" class="truckLabel">--</div></div><div class="ep">SLI</div></div></div>
-<div class="grid"><div class="side"><div class="muted">ESTADO ACTUAL</div><div id="status" class="status">CARGANDO...</div><div id="sub" class="muted">Esperando JSON</div><div class="kpis"><div class="kpi"><b id="km">-- km</b><small>DISTANCIA RESTANTE</small></div><div class="kpi"><b id="eta">-- min</b><small>ETA</small></div><div class="kpi"><b id="arr">--:--</b><small>LLEGADA ESTIMADA</small></div><div class="kpi"><b id="adv">--%</b><small>AVANCE DE RUTA</small></div></div><div class="operation-time"><div class="operation-box"><div class="operation-label">TIEMPO DE OPERACIÓN</div><div id="tiempoOperacion" class="operation-value">--:--:--</div><div class="operation-sub">Desde 1° Akzo</div></div></div><div class="controls"><div class="muted" style="margin-bottom:6px">SENTIDO PARA PRUEBAS</div><select id="override"><option value="AUTO">AUTO (movimiento GPS)</option><option value="AKZO_SLI">AKZO → SLI</option><option value="SLI_AKZO">SLI → AKZO</option></select><div id="debug" class="debug"></div></div></div><div class="mapwrap"><div id="map" style="position:relative"><div id="plantMediaWrap" class="plant-media-wrap"><div id="plantMediaCard" class="plant-media-card"><video id="plantMediaVideo" class="plant-media-video" muted autoplay loop playsinline preload="auto"><source src="https://consultassli.github.io/Playa/assets/shuttle_carga_descarga.mp4" type="video/mp4"></video><img id="plantMediaImage" class="plant-media-image" src="https://consultassli.github.io/Playa/assets/shuttle_balanza_gruposli.png" alt="Camión Grupo SLI sobre balanza"><div id="plantMediaBadge" class="plant-media-badge">OPERACIÓN EN PLANTA</div></div></div></div><div id="routeBadge" class="badge">esperando ruta</div></div></div></div>
-<div class="section-title">Viajes del día</div><div id="trips" class="trips"><div class="trip"><div class="trip-head"><div><div class="trip-title">Cargando viajes...</div></div></div></div></div></div>
+<div class="routeStrip"><div class="routeLine"><div class="ep">AKZO</div><div class="rail"><div id="remainRail" class="remain"></div><div id="truckRail" class="truck">
+  <img id="truckRailImg"
+       src="https://consultassli.github.io/Playa/assets/camion_barra_hacia_sli.png"
+       alt="Camión Grupo SLI">
+</div><div id="truckRailLabel" class="truckLabel">--</div></div><div class="ep">SLI</div></div></div>
+<div class="grid"><div class="side"><div class="muted">ESTADO ACTUAL</div><div id="status" class="status">CARGANDO...</div><div id="sub" class="muted">Esperando JSON</div><div class="kpis"><div class="kpi"><b id="km">-- km</b><small>DISTANCIA RESTANTE</small></div><div class="kpi"><b id="eta">-- min</b><small>ETA</small></div><div class="kpi"><b id="arr">--:--</b><small>LLEGADA ESTIMADA</small></div><div class="kpi"><b id="adv">--%</b><small>AVANCE DE RUTA</small></div></div><div class="operation-time"><div class="operation-box"><div class="operation-label">TIEMPO DE OPERACIÓN</div><div id="tiempoOperacion" class="operation-value">--:--:--</div><div class="operation-sub">Desde 1° Akzo</div></div></div><div class="controls"><div class="muted" style="margin-bottom:6px">SENTIDO PARA PRUEBAS</div><select id="override"><option value="AUTO">AUTO (movimiento GPS)</option><option value="AKZO_SLI">AKZO → SLI</option><option value="SLI_AKZO">SLI → AKZO</option></select><div id="debug" class="debug"></div></div></div><div class="mapwrap"><div id="map" style="position:relative">
+      <div id="plantMediaWrap" class="plant-media-wrap">
+        <div id="plantMediaCard" class="plant-media-card">
+          <video id="plantMediaVideo" class="plant-media-video" muted autoplay loop playsinline preload="metadata"></video>
+          <img id="plantMediaImage" class="plant-media-image"
+               src="https://consultassli.github.io/Playa/assets/shuttle_balanza_gruposli.png"
+               alt="Camión Grupo SLI sobre balanza">
+          <div id="plantMediaBadge" class="plant-media-badge">OPERACIÓN EN PLANTA</div>
+        </div>
+      </div></div><div id="routeBadge" class="badge">esperando ruta</div></div></div></div>
+  <div class="section-title">Viajes del día</div>
+  <div id="trips" class="trips"><div class="trip"><div class="trip-head"><div><div class="trip-title">Cargando viajes...</div></div></div></div></div>
+</div>
 <script src="https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.js"></script>
 <script>
 const API='https://script.google.com/macros/s/AKfycbyH4swHGQjI8ZTK3AqiXM9ztGbiqFTnWOpSYCEK09pXr02FB0KOxLoXbVqtCE7py4lbeg/exec';
 const TRUCK_IMG_HACIA_AKZO='https://consultassli.github.io/Playa/assets/camion_barra_hacia_akzo.png';
-const TRUCK_IMG_HACIA_SLI='https://consultassli.github.io/Playa/assets/camion_barra_hacia_sli.png';
-function truckImageForDirection(dir){return dir==='SLI_AKZO'?TRUCK_IMG_HACIA_AKZO:TRUCK_IMG_HACIA_SLI}
-function setTruckRailDirection(dir){const img=document.getElementById('truckRailImg');if(img)img.src=truckImageForDirection(dir)}
-function setTruckRailPosition(percent){const el=document.getElementById('truckRail');if(!el)return;const safe=Math.max(5,Math.min(95,Number(percent)||0));el.style.left=safe+'%'}
+const TRUCK_IMG_HACIA_SLI ='https://consultassli.github.io/Playa/assets/camion_barra_hacia_sli.png';
+
+function truckImageForDirection(dir){
+  return dir==='SLI_AKZO' ? TRUCK_IMG_HACIA_AKZO : TRUCK_IMG_HACIA_SLI;
+}
+
+function setTruckRailDirection(dir){
+  const img=document.getElementById('truckRailImg');
+  if(!img)return;
+  img.src=truckImageForDirection(dir);
+}
+
+function setTruckRailPosition(percent){
+  const el=document.getElementById('truckRail');
+  if(!el)return;
+  // Reserva espacio visual en ambos extremos para no tapar AKZO / SLI.
+  const safe=Math.max(5,Math.min(95,Number(percent)||0));
+  el.style.left=safe+'%';
+}
+
 const ROUTES={SLI_AKZO:{origen:'SLI',destino:'AKZO',mins:18,c:[[-58.69017,-34.42842],[-58.68841,-34.4306],[-58.68417,-34.43612],[-58.68246,-34.43827],[-58.68054,-34.44075],[-58.6767,-34.44567],[-58.67621,-34.4463],[-58.67622,-34.44638],[-58.68212,-34.44661],[-58.68889,-34.44749],[-58.69008,-34.44757],[-58.6964,-34.4474],[-58.69899,-34.44753],[-58.70037,-34.44602],[-58.70431,-34.44095],[-58.70721,-34.43769],[-58.71148,-34.43398],[-58.71247,-34.43266],[-58.71274,-34.43182],[-58.7128,-34.43156],[-58.71378,-34.43112],[-58.714,-34.43196]]},AKZO_SLI:{origen:'AKZO',destino:'SLI',mins:24.5,c:[[-58.7138,-34.43259],[-58.71114,-34.43577],[-58.70871,-34.43785],[-58.7062,-34.44063],[-58.70247,-34.44526],[-58.70016,-34.44836],[-58.69792,-34.45102],[-58.69569,-34.45398],[-58.69554,-34.45391],[-58.69458,-34.45319],[-58.69655,-34.45092],[-58.69872,-34.44789],[-58.69648,-34.44759],[-58.69164,-34.44771],[-58.6909,-34.44772],[-58.6857,-34.44721],[-58.68423,-34.44701],[-58.67908,-34.44628],[-58.67571,-34.44659],[-58.67565,-34.44651],[-58.67572,-34.44632],[-58.6773,-34.44453],[-58.67984,-34.4413],[-58.68007,-34.44096],[-58.68319,-34.43712],[-58.68372,-34.43642],[-58.68524,-34.43439],[-58.68727,-34.43116],[-58.68867,-34.43005],[-58.68955,-34.42874]]}};
-const AKZO={lat:-34.43279,lon:-58.71517},SLI={lat:-34.42751,lon:-58.68844};let map,truckMarker,lastGps=null,autoDirection=null,plantMediaMarker=null,plantMediaTarget=null;let SIM_MODE='LIVE',simIndex=0,simTimer=null,LAST_TRIPS_DATA=null;let FIRST_AKZO_TIME=null,CURRENT_STARTED_TRIPS=0,CURRENT_PROGRAMMED_TRIPS=0;
-function argentinaNowHMS(){return new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date())}
-function secondsFromHMS(h){const p=String(h||'').split(':').map(Number);if(p.length<2||!Number.isFinite(p[0])||!Number.isFinite(p[1]))return null;return(p[0]||0)*3600+(p[1]||0)*60+(p[2]||0)}
-function elapsedSecondsLive(startHMS){const s=secondsFromHMS(startHMS),n=secondsFromHMS(argentinaNowHMS());if(s==null||n==null)return null;let d=n-s;if(d<0)d+=86400;return d}
-function fmtDuration(sec){if(sec==null||!Number.isFinite(sec))return'--:--:--';sec=Math.max(0,Math.floor(sec));const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return[h,m,s].map(x=>String(x).padStart(2,'0')).join(':')}
-function fmtHM(mins){mins=Math.max(0,Math.round(Number(mins)||0));return`${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`}
-function normalizeEventName(name){return String(name||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
-function firstAkzoTimeFromTrips(data){const cam=(data?.camiones||[])[0]||{},viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(a.n||a.id||0)-Number(b.n||b.id||0)),aliases=['ENTRADA AKZO','EN AKZO','PUERTA AKZO','BALANZA','CARGA AKZO'];for(const v of viajes){for(const e of(v.eventos||[])){const nom=normalizeEventName(e.evento||e.movimiento);if(aliases.some(a=>nom.includes(a))&&e.inicio)return e.inicio}}return viajes.find(v=>v.inicio)?.inicio||null}
-function updateOperationalTimers(){const now=argentinaNowHMS();if(FIRST_AKZO_TIME){const sec=elapsedSecondsLive(FIRST_AKZO_TIME),op=document.getElementById('tiempoOperacion');if(op)op.textContent=fmtDuration(sec);if(sec!=null&&CURRENT_STARTED_TRIPS>0){const ritmo=Math.max(1,Math.round((sec/60)/CURRENT_STARTED_TRIPS)),r=document.getElementById('ritmoActual');if(r)r.textContent=`⏱ Ritmo: ${ritmo} min / viaje`;const proy=ritmo*CURRENT_PROGRAMMED_TRIPS,saldo=720-proy,p=document.getElementById('proyeccionTurno');if(p){p.classList.toggle('warn',saldo<0);p.textContent=saldo>=0?`✅ Proyección OK. Terminarás con ${fmtHM(saldo)} de sobra.`:`⚠ Proyección: excederás el turno por ${fmtHM(Math.abs(saldo))}.`}}}document.querySelectorAll('[data-live-start]').forEach(el=>{const sec=elapsedSecondsLive(el.dataset.liveStart),min=sec==null?'--':Math.max(0,Math.round(sec/60));el.textContent=min==='--'?'--':`${min}${el.dataset.liveUnit||' min'}`});document.querySelectorAll('[data-live-now]').forEach(el=>el.textContent=now)}
+const AKZO={lat:-34.43279,lon:-58.71517},SLI={lat:-34.42751,lon:-58.68844};let map,truckMarker,lastGps=null,autoDirection=null,plantMediaMarker=null,plantMediaTarget=null,lastPlantViewKey=null;
+const MEDIA_VIDEO_CARGA_AKZO='https://consultassli.github.io/Playa/assets/shuttle_carga_akzo.mp4';
+const MEDIA_VIDEO_DESCARGA_SLI='https://consultassli.github.io/Playa/assets/shuttle_descarga_sli.mp4';
+let SIM_MODE='LIVE', simIndex=0, simTimer=null, LAST_TRIPS_DATA=null;
+let FIRST_AKZO_TIME=null;
+let CURRENT_STARTED_TRIPS=0;
+let CURRENT_PROGRAMMED_TRIPS=0;
+
+function argentinaNowHMS(){
+  return new Intl.DateTimeFormat('en-GB',{
+    timeZone:'America/Argentina/Buenos_Aires',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',
+    hour12:false
+  }).format(new Date());
+}
+
+function secondsFromHMS(h){
+  const p=String(h||'').split(':').map(Number);
+  if(p.length<2 || !Number.isFinite(p[0]) || !Number.isFinite(p[1])) return null;
+  return (p[0]||0)*3600+(p[1]||0)*60+(p[2]||0);
+}
+
+function elapsedSecondsLive(startHMS){
+  const s=secondsFromHMS(startHMS);
+  const n=secondsFromHMS(argentinaNowHMS());
+  if(s==null || n==null)return null;
+  let d=n-s;
+  if(d<0)d+=86400;
+  return d;
+}
+
+function fmtDuration(sec){
+  if(sec==null || !Number.isFinite(sec))return '--:--:--';
+  sec=Math.max(0,Math.floor(sec));
+  const h=Math.floor(sec/3600);
+  const m=Math.floor((sec%3600)/60);
+  const s=sec%60;
+  return [h,m,s].map(x=>String(x).padStart(2,'0')).join(':');
+}
+
+function fmtHM(mins){
+  mins=Math.max(0,Math.round(Number(mins)||0));
+  return `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`;
+}
+
+function firstAkzoTimeFromTrips(data){
+  const cam=(data?.camiones||[])[0]||{};
+  const viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(a.n||a.id||0)-Number(b.n||b.id||0));
+  const aliases=['ENTRADA AKZO','EN AKZO','PUERTA AKZO','BALANZA','CARGA AKZO'];
+  for(const v of viajes){
+    for(const e of (v.eventos||[])){
+      const nom=normalizeEventName(e.evento||e.movimiento);
+      if(aliases.some(a=>nom.includes(a)) && e.inicio) return e.inicio;
+    }
+  }
+  return viajes.find(v=>v.inicio)?.inicio || null;
+}
+
+function updateOperationalTimers(){
+  const now=argentinaNowHMS();
+
+  if(FIRST_AKZO_TIME){
+    const sec=elapsedSecondsLive(FIRST_AKZO_TIME);
+    const op=document.getElementById('tiempoOperacion');
+    if(op)op.textContent=fmtDuration(sec);
+
+    if(sec!=null && CURRENT_STARTED_TRIPS>0){
+      const ritmo=Math.max(1,Math.round((sec/60)/CURRENT_STARTED_TRIPS));
+      const r=document.getElementById('ritmoActual');
+      if(r)r.textContent=`⏱ Ritmo: ${ritmo} min / viaje`;
+
+      const proy=ritmo*CURRENT_PROGRAMMED_TRIPS;
+      const saldo=720-proy;
+      const p=document.getElementById('proyeccionTurno');
+      if(p){
+        p.classList.toggle('warn',saldo<0);
+        p.textContent=saldo>=0
+          ? `✅ Proyección OK. Terminarás con ${fmtHM(saldo)} de sobra.`
+          : `⚠ Proyección: excederás el turno por ${fmtHM(Math.abs(saldo))}.`;
+      }
+    }
+  }
+
+  document.querySelectorAll('[data-live-start]').forEach(el=>{
+    const sec=elapsedSecondsLive(el.dataset.liveStart);
+    const min=sec==null?'--':Math.max(0,Math.round(sec/60));
+    el.textContent=min==='--'?'--':`${min}${el.dataset.liveUnit||' min'}`;
+  });
+
+  document.querySelectorAll('[data-live-now]').forEach(el=>{
+    el.textContent=now;
+  });
+}
+
 function dist(a,b){const R=6371e3,p1=a.lat*Math.PI/180,p2=b.lat*Math.PI/180,dp=(b.lat-a.lat)*Math.PI/180,dl=(b.lon-a.lon)*Math.PI/180,x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
 function lineDist(c){let t=0;for(let i=1;i<c.length;i++)t+=dist({lon:c[i-1][0],lat:c[i-1][1]},{lon:c[i][0],lat:c[i][1]});return t}
 function project(lat,lon,c){const lat0=lat*Math.PI/180,mx=111320*Math.cos(lat0),my=110540;let acc=0,best=null;for(let i=0;i<c.length-1;i++){const a=c[i],b=c[i+1],ax=(a[0]-lon)*mx,ay=(a[1]-lat)*my,bx=(b[0]-lon)*mx,by=(b[1]-lat)*my,vx=bx-ax,vy=by-ay,l2=vx*vx+vy*vy;if(!l2)continue;let t=-(ax*vx+ay*vy)/l2;t=Math.max(0,Math.min(1,t));const px=ax+t*vx,py=ay+t*vy,d=Math.hypot(px,py),seg=Math.sqrt(l2);if(!best||d<best.off)best={seg:i,t,lon:a[0]+(b[0]-a[0])*t,lat:a[1]+(b[1]-a[1])*t,walk:acc+seg*t,off:d};acc+=seg}if(!best)return null;best.total=lineDist(c);best.remain=Math.max(0,best.total-best.walk);best.remainCoords=[[best.lon,best.lat],...c.slice(best.seg+1)];return best}
-function inferDirection(cur){const manual=document.getElementById('override').value;if(manual!=='AUTO')return manual;const lat=+cur.lat,lon=+cur.lon,pAS=project(lat,lon,ROUTES.AKZO_SLI.c),pSA=project(lat,lon,ROUTES.SLI_AKZO.c),offAS=pAS?pAS.off:Infinity,offSA=pSA?pSA.off:Infinity;if(Math.abs(offAS-offSA)>=60){autoDirection=offAS<offSA?'AKZO_SLI':'SLI_AKZO';return autoDirection}if(lastGps){const prev={lat:lastGps.lat,lon:lastGps.lon},now={lat,lon},gainSli=dist(prev,SLI)-dist(now,SLI),gainAk=dist(prev,AKZO)-dist(now,AKZO);if(Math.abs(gainSli-gainAk)>8){autoDirection=gainSli>gainAk?'AKZO_SLI':'SLI_AKZO';return autoDirection}}if(autoDirection)return autoDirection;autoDirection=offAS<=offSA?'AKZO_SLI':'SLI_AKZO';return autoDirection}
+function inferDirection(cur){
+ const manual=document.getElementById('override').value;
+ if(manual!=='AUTO')return manual;
+
+ const lat=+cur.lat,lon=+cur.lon;
+ const pAS=project(lat,lon,ROUTES.AKZO_SLI.c);
+ const pSA=project(lat,lon,ROUTES.SLI_AKZO.c);
+ const offAS=pAS?pAS.off:Infinity;
+ const offSA=pSA?pSA.off:Infinity;
+
+ // Regla principal: elegir la traza físicamente más cercana al GPS.
+ // Si una ruta está claramente más cerca (>= 60 m de diferencia), manda esa.
+ if(Math.abs(offAS-offSA)>=60){
+   autoDirection=offAS<offSA?'AKZO_SLI':'SLI_AKZO';
+   return autoDirection;
+ }
+
+ // En sectores donde ambas rutas pasan cerca, usamos el movimiento real.
+ if(lastGps){
+   const prev={lat:lastGps.lat,lon:lastGps.lon},now={lat,lon};
+   const gainSli=dist(prev,SLI)-dist(now,SLI);
+   const gainAk=dist(prev,AKZO)-dist(now,AKZO);
+   if(Math.abs(gainSli-gainAk)>8){
+     autoDirection=gainSli>gainAk?'AKZO_SLI':'SLI_AKZO';
+     return autoDirection;
+   }
+ }
+
+ // Si todavía no alcanzó a moverse, conservamos el sentido ya elegido.
+ if(autoDirection)return autoDirection;
+
+ // Último recurso: la traza más cercana, nunca el sentido viejo del backend.
+ autoDirection=offAS<=offSA?'AKZO_SLI':'SLI_AKZO';
+ return autoDirection;
+}
 function routeGeo(c){return{type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'LineString',coordinates:c},properties:{}}]}}
 function markerPlant(txt,p){const e=document.createElement('div');e.className='plant';e.textContent=txt;new maplibregl.Marker({element:e,anchor:'bottom'}).setLngLat([p.lon,p.lat]).addTo(map)}
-function initMap(){map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:[-58.695,-34.441],zoom:13.3,pitch:52,bearing:-20});map.addControl(new maplibregl.NavigationControl(),'top-right');map.on('load',()=>{map.addSource('total',{type:'geojson',data:routeGeo(ROUTES.AKZO_SLI.c)});map.addLayer({id:'totalL',type:'line',source:'total',paint:{'line-color':'#64748b','line-width':7,'line-opacity':.75},layout:{'line-cap':'round','line-join':'round'}});map.addSource('remain',{type:'geojson',data:routeGeo(ROUTES.AKZO_SLI.c)});map.addLayer({id:'remainL',type:'line',source:'remain',paint:{'line-color':'#00e676','line-width':8},layout:{'line-cap':'round','line-join':'round'}});markerPlant('🏭 AKZO',AKZO);markerPlant('📦 SLI',SLI)});map.on('zoom',updatePlantMediaScale)}
-function getLatestOpenEvent(){const d=LAST_TRIPS_DATA||{},cam=(d.camiones||[])[0]||{},viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(b.n||b.id||0)-Number(a.n||a.id||0)),v=viajes[0];if(!v)return null;const eventos=v.eventos||[];for(let i=eventos.length-1;i>=0;i--){const e=eventos[i]||{};if(e.inicio&&!e.fin)return e}return null}
-function currentOperationalState(c){const open=getLatestOpenEvent(),ev=normalizeEventName(open?.evento||open?.movimiento);if(ev.includes('CARGA')&&ev.includes('AKZO'))return{kind:'PLANT',label:'CARGA AKZO',emoji:'🏭',event:open};if(ev.includes('BALANZA'))return{kind:'PLANT',label:'BALANZA',emoji:'⚖️',event:open};if(ev.includes('DESCARGA')&&ev.includes('SLI'))return{kind:'PLANT',label:'DESCARGA SLI',emoji:'📦',event:open};if(ev.includes('ENTRADA')&&ev.includes('AKZO'))return{kind:'PLANT',label:'ENTRADA AKZO',emoji:'🏭',event:open};if(ev.includes('ENTRADA')&&ev.includes('SLI'))return{kind:'PLANT',label:'ENTRADA SLI',emoji:'📦',event:open};const fase=String(c.fase||'').toUpperCase(),zona=String(c.zona||'').toUpperCase();if(fase.includes('DESCARG')||zona.includes('DESCARGA SLI'))return{kind:'PLANT',label:'DESCARGA SLI',emoji:'📦'};if(fase==='EN_AKZO'||zona==='AKZO'||zona.includes('CARGA AKZO')||zona.includes('BALANZA'))return{kind:'PLANT',label:zona.includes('BALANZA')?'BALANZA':(zona.includes('CARGA')?'CARGA AKZO':'EN AKZO'),emoji:'🏭'};if(fase==='EN_SLI'||zona==='SLI')return{kind:'PLANT',label:'EN SLI',emoji:'📦'};if(fase.includes('RUTA_A_SLI'))return{kind:'ROUTE',dir:'AKZO_SLI',label:'EN RUTA A SLI',emoji:'🚚'};if(fase.includes('RUTA_A_AKZO'))return{kind:'ROUTE',dir:'SLI_AKZO',label:'EN RUTA A AKZO',emoji:'🚚'};return{kind:'ROUTE',dir:null,label:null,emoji:'🚚'}}
-function updatePlantMediaScale(){const card=document.getElementById('plantMediaCard');if(!card||!map||!plantMediaTarget)return;const z=Number(map.getZoom()||13.3),scale=Math.max(.42,Math.min(.92,.45+(z-13)*.15));card.style.setProperty('--plant-media-scale',String(scale))}
-function ensurePlantMediaMarker(point){const wrap=document.getElementById('plantMediaWrap');if(!wrap||!map)return;if(!plantMediaMarker){plantMediaMarker=new maplibregl.Marker({element:wrap,anchor:'center'}).setLngLat([point.lon,point.lat]).addTo(map)}else plantMediaMarker.setLngLat([point.lon,point.lat]);plantMediaTarget=point;updatePlantMediaScale()}
-function showPlantMedia(label){const wrap=document.getElementById('plantMediaWrap'),vid=document.getElementById('plantMediaVideo'),img=document.getElementById('plantMediaImage'),badge=document.getElementById('plantMediaBadge');if(!wrap||!vid||!img)return;wrap.className='plant-media-wrap';vid.classList.remove('show');img.classList.remove('show');let point=null;if(label==='BALANZA'){point=AKZO;wrap.classList.add('show','akzo','balanza');img.classList.add('show');if(badge)badge.textContent='⚖️ BALANZA AKZO';vid.pause()}else if(label==='CARGA AKZO'){point=AKZO;wrap.classList.add('show','akzo');vid.classList.add('show');if(badge)badge.textContent='🏗️ CARGANDO AKZO';vid.play().catch(()=>{})}else if(label==='DESCARGA SLI'){point=SLI;wrap.classList.add('show','sli');vid.classList.add('show');if(badge)badge.textContent='📦 DESCARGANDO SLI';vid.play().catch(()=>{})}else{vid.pause();wrap.classList.remove('show');plantMediaTarget=null;return}if(point)ensurePlantMediaMarker(point)}
-function ensureTruckMarker(lngLat){if(!truckMarker){const e=document.createElement('div');e.className='markerTruck';const img=document.createElement('img');img.className='mapTruckImg';img.id='mapTruckImg';img.src=TRUCK_IMG_HACIA_SLI;img.alt='Camión Grupo SLI';e.appendChild(img);truckMarker=new maplibregl.Marker({element:e,anchor:'center'}).setLngLat(lngLat).addTo(map)}else truckMarker.setLngLat(lngLat);return truckMarker}
-function setMapTruckDirection(dir){if(!truckMarker)return;const img=truckMarker.getElement().querySelector('#mapTruckImg');if(img){const wanted=truckImageForDirection(dir);if(img.src!==wanted)img.src=wanted}}
-function setTruckHeadingOnRoute(def,p,dir){if(!truckMarker)return;setMapTruckDirection(dir);const img=truckMarker.getElement().querySelector('#mapTruckImg');if(img)img.style.transform='none'}
-function resetTruckHeading(dir){if(!truckMarker)return;setMapTruckDirection(dir);const img=truckMarker.getElement().querySelector('#mapTruckImg');if(img)img.style.transform='none'}
-function render(data){const r=data.resumen||{},c=(data.camiones||[])[0]||{};if(!Number.isFinite(+c.lat)||!Number.isFinite(+c.lon))return;const state=currentOperationalState(c),prog=+r.viajesProgramadosTms||0,ok=+r.viajesCompletosGps||0,run=+r.viajesEnCursoGps||0,pend=+r.viajesPendientes||0;CURRENT_PROGRAMMED_TRIPS=prog;CURRENT_STARTED_TRIPS=Math.max(0,ok+run);document.getElementById('prog').textContent=prog;document.getElementById('ok').style.width=(prog?ok/prog*100:0)+'%';document.getElementById('run').style.width=(prog?run/prog*100:0)+'%';document.getElementById('pend').style.width=(prog?pend/prog*100:100)+'%';document.getElementById('barTxt').textContent=`${ok} completos · ${run} en curso · ${pend} pendientes`;document.getElementById('sub').textContent=`Última posición GPS: ${c.horaGps||'--:--:--'}`;if(state.kind==='PLANT'){showPlantMedia(state.label);document.getElementById('status').textContent=`${state.emoji} ${state.label}`;['km','eta','arr'].forEach(id=>document.getElementById(id).textContent='--');document.getElementById('adv').textContent='--%';const atAkzo=state.label.includes('AKZO')||state.label==='BALANZA',x=atAkzo?0:100,rr=document.getElementById('remainRail');rr.style.left='0';rr.style.width='0';setTruckRailPosition(x);const plantDir=atAkzo?'AKZO_SLI':'SLI_AKZO';setTruckRailDirection(plantDir);if(map?.getSource('total')){map.getSource('total').setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});map.getSource('remain').setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}})}ensureTruckMarker([+c.lon,+c.lat]);resetTruckHeading(plantDir);const center=atAkzo?[AKZO.lon,AKZO.lat]:[SLI.lon,SLI.lat];map?.easeTo({center,zoom:14.4,pitch:52,bearing:-20,duration:650});document.getElementById('routeBadge').textContent=`${state.label} · posición GPS real`;lastGps={lat:+c.lat,lon:+c.lon};document.getElementById('sync').textContent=(data.actualizado||'').slice(-8);return}showPlantMedia(null);const dir=state.dir||inferDirection(c),def=ROUTES[dir],p=project(+c.lat,+c.lon,def.c);if(!p)return;const progress=Math.max(0,Math.min(100,p.walk/p.total*100)),remaining=100-progress,label=state.label||`EN RUTA A ${def.destino}`;document.getElementById('status').textContent='🚚 '+label;document.getElementById('km').textContent=(p.remain/1000).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})+' km';const eta=Math.max(1,Math.round(def.mins*(p.remain/p.total)));document.getElementById('eta').textContent=eta+' min';document.getElementById('arr').textContent=new Date(Date.now()+eta*60000).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hour12:false});document.getElementById('adv').textContent=Math.round(progress)+'%';const x=dir==='AKZO_SLI'?progress:100-progress,rr=document.getElementById('remainRail');if(dir==='AKZO_SLI'){rr.style.left=x+'%';rr.style.width=remaining+'%'}else{rr.style.left='0';rr.style.width=x+'%'}setTruckRailPosition(x);setTruckRailDirection(dir);if(map?.getSource('total')){map.getSource('total').setData(routeGeo(def.c));map.getSource('remain').setData(routeGeo(p.remainCoords));const b=def.c.reduce((bb,q)=>bb.extend(q),new maplibregl.LngLatBounds(def.c[0],def.c[0]));map.fitBounds(b,{padding:45,pitch:52,bearing:-20,duration:500})}ensureTruckMarker([p.lon,p.lat]);setTruckHeadingOnRoute(def,p,dir);document.getElementById('routeBadge').textContent=`${def.origen} → ${def.destino} · GPS a ${Math.round(p.off)} m de la traza`;lastGps={lat:+c.lat,lon:+c.lon};document.getElementById('sync').textContent=(data.actualizado||'').slice(-8)}
-async function load(){try{const u=API+'?action=dashboard-json&_='+Date.now(),j=await(await fetch(u,{cache:'no-store'})).json();if(!j.ok)throw Error(j.error||'API cache error');const paquete=j.data||{};if(!paquete.operacion)throw Error('JSON cache sin bloque operacion');LAST_TRIPS_DATA=paquete.viajes||null;render(paquete.operacion);if(paquete.viajes)renderTrips(paquete.viajes)}catch(e){console.error(e)}}
+function initMap(){
+  map=new maplibregl.Map({
+    container:'map',
+    style:'https://tiles.openfreemap.org/styles/liberty',
+    center:[-58.695,-34.441],
+    zoom:13.3,
+    pitch:52,
+    bearing:-20
+  });
+
+  map.addControl(new maplibregl.NavigationControl(),'top-right');
+
+  map.on('load',()=>{
+    map.addSource('total',{type:'geojson',data:routeGeo(ROUTES.AKZO_SLI.c)});
+    map.addLayer({
+      id:'totalL',
+      type:'line',
+      source:'total',
+      paint:{'line-color':'#64748b','line-width':7,'line-opacity':.75},
+      layout:{'line-cap':'round','line-join':'round'}
+    });
+
+    map.addSource('remain',{type:'geojson',data:routeGeo(ROUTES.AKZO_SLI.c)});
+    map.addLayer({
+      id:'remainL',
+      type:'line',
+      source:'remain',
+      paint:{'line-color':'#00e676','line-width':8},
+      layout:{'line-cap':'round','line-join':'round'}
+    });
+
+    markerPlant('🏭 AKZO',AKZO);
+    markerPlant('📦 SLI',SLI);
+  });
+
+  map.on('zoom',updatePlantMediaScale);
+  map.on('moveend',()=>{
+    if(plantMediaMarker && plantMediaTarget){
+      plantMediaMarker.setLngLat([plantMediaTarget.lon,plantMediaTarget.lat]);
+      updatePlantMediaScale();
+    }
+  });
+}
+
+function setActiveSimButton(mode){
+  document.querySelectorAll('.simbar button').forEach(b=>b.classList.remove('active'));
+  const mapIds={LIVE:'btnLive'};
+  if(mapIds[mode]) document.getElementById(mapIds[mode])?.classList.add('active');
+  else{
+    const txt = mode==='SLI_AKZO'?'Sim SLI→AKZO':mode==='AKZO_SLI'?'Sim AKZO→SLI':mode==='CARGA'?'Sim Carga':'Sim Descarga';
+    [...document.querySelectorAll('.simbar button')].find(b=>b.textContent===txt)?.classList.add('active');
+  }
+}
+function buildSimData(mode){
+  const now=new Date();
+  const hh=now.toLocaleTimeString('es-AR',{hour12:false});
+  let lat=SLI.lat,lon=SLI.lon,fase='EN_SLI',sentido=null,zona='SLI',ruta=null;
+  if(mode==='CARGA'){lat=AKZO.lat;lon=AKZO.lon;fase='EN_AKZO';zona='Carga Akzo';}
+  else if(mode==='DESCARGA'){lat=SLI.lat;lon=SLI.lon;fase='DESCARGANDO_SLI';zona='Descarga SLI';}
+  else if(mode==='SLI_AKZO'){
+    const c=ROUTES.SLI_AKZO.c; const i=Math.min(simIndex,c.length-1); lon=c[i][0];lat=c[i][1];fase='EN_RUTA_A_AKZO';sentido='SLI_AKZO';zona='Ruta';
+  } else if(mode==='AKZO_SLI'){
+    const c=ROUTES.AKZO_SLI.c; const i=Math.min(simIndex,c.length-1); lon=c[i][0];lat=c[i][1];fase='EN_RUTA_A_SLI';sentido='AKZO_SLI';zona='Ruta';
+  }
+  return {
+    actualizado:hh,
+    resumen:{viajesProgramadosTms:8,viajesCompletosGps:7,viajesEnCursoGps:1,viajesPendientes:0},
+    camiones:[{patente:'DEMO',lat,lon,horaGps:hh,fase,sentido,zona,ruta}]
+  };
+}
+function runSimulationTick(){
+  if(SIM_MODE==='LIVE')return;
+  if(SIM_MODE==='SLI_AKZO'||SIM_MODE==='AKZO_SLI'){
+    const c=ROUTES[SIM_MODE].c;
+    simIndex=(simIndex+1)%c.length;
+  }
+  render(buildSimData(SIM_MODE));
+}
+function setSim(mode){
+  SIM_MODE=mode; simIndex=0; autoDirection=null; lastGps=null;
+  setActiveSimButton(mode);
+  if(simTimer){clearInterval(simTimer);simTimer=null}
+  if(mode==='LIVE'){load();return}
+  render(buildSimData(mode));
+  if(mode==='SLI_AKZO'||mode==='AKZO_SLI') simTimer=setInterval(runSimulationTick,1200);
+}
+
+
+function getLatestOpenEvent(){
+  const d=LAST_TRIPS_DATA||{};
+  const cam=(d.camiones||[])[0]||{};
+  const viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(b.n||b.id||0)-Number(a.n||a.id||0));
+  const v=viajes[0];
+  if(!v)return null;
+  const eventos=(v.eventos||[]);
+  // Prefer an explicitly open event.
+  for(let i=eventos.length-1;i>=0;i--){
+    const e=eventos[i]||{};
+    if(e.inicio && !e.fin) return e;
+  }
+  return null;
+}
+function normalizeEventName(name){
+  return String(name||'').trim().toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function currentOperationalState(c){
+  const open=getLatestOpenEvent();
+  const ev=normalizeEventName(open?.evento||open?.movimiento);
+  if(ev.includes('CARGA') && ev.includes('AKZO')) return {kind:'PLANT', label:'CARGA AKZO', emoji:'🏭', event:open};
+  if(ev.includes('BALANZA')) return {kind:'PLANT', label:'BALANZA', emoji:'⚖️', event:open};
+  if(ev.includes('DESCARGA') && ev.includes('SLI')) return {kind:'PLANT', label:'DESCARGA SLI', emoji:'📦', event:open};
+  if(ev.includes('ENTRADA') && ev.includes('AKZO')) return {kind:'PLANT', label:'ENTRADA AKZO', emoji:'🏭', event:open};
+  if(ev.includes('ENTRADA') && ev.includes('SLI')) return {kind:'PLANT', label:'ENTRADA SLI', emoji:'🏭', event:open};
+
+  const fase=String(c.fase||'').toUpperCase();
+  const zona=String(c.zona||'').toUpperCase();
+
+  if(fase.includes('DESCARG') || zona.includes('DESCARGA SLI')) return {kind:'PLANT', label:'DESCARGA SLI', emoji:'📦'};
+  if(fase==='EN_AKZO' || zona==='AKZO' || zona.includes('CARGA AKZO') || zona.includes('BALANZA'))
+    return {kind:'PLANT', label: zona.includes('BALANZA')?'BALANZA':(zona.includes('CARGA')?'CARGA AKZO':'EN AKZO'), emoji:'🏭'};
+  if(fase==='EN_SLI' || zona==='SLI') return {kind:'PLANT', label:'EN SLI', emoji:'🏭'};
+  if(fase.includes('RUTA_A_SLI')) return {kind:'ROUTE', dir:'AKZO_SLI', label:'EN RUTA A SLI', emoji:'🚚'};
+  if(fase.includes('RUTA_A_AKZO')) return {kind:'ROUTE', dir:'SLI_AKZO', label:'EN RUTA A AKZO', emoji:'🚚'};
+  return {kind:'ROUTE', dir:null, label:null, emoji:'🚚'};
+}
+
+
+function updatePlantMediaScale(){
+  const card=document.getElementById('plantMediaCard');
+  if(!card || !map || !plantMediaTarget)return;
+
+  const z=Number(map.getZoom()||13.3);
+
+  // A medida que alejás el mapa, la tarjeta también se achica.
+  // 13.0 => ~45%, 14.0 => ~60%, 15.0 => ~75%, 16.0 => ~90%.
+  const scale=Math.max(.42,Math.min(.92,.45+(z-13)*.15));
+  card.style.setProperty('--plant-media-scale',String(scale));
+}
+
+function ensurePlantMediaMarker(point){
+  const wrap=document.getElementById('plantMediaWrap');
+  if(!wrap || !map)return;
+
+  if(!plantMediaMarker){
+    plantMediaMarker=new maplibregl.Marker({
+      element:wrap,
+      anchor:'center'
+    }).setLngLat([point.lon,point.lat]).addTo(map);
+  }else{
+    plantMediaMarker.setLngLat([point.lon,point.lat]);
+  }
+
+  plantMediaTarget=point;
+  updatePlantMediaScale();
+}
+
+function setPlantVideoSource(url){
+  const vid=document.getElementById('plantMediaVideo');
+  if(!vid||!url)return;
+  if(vid.dataset.mediaSrc!==url){
+    vid.pause();
+    vid.src=url;
+    vid.dataset.mediaSrc=url;
+    vid.load();
+  }
+}
+
+function showPlantMedia(label){
+  const wrap=document.getElementById('plantMediaWrap');
+  const vid=document.getElementById('plantMediaVideo');
+  const img=document.getElementById('plantMediaImage');
+  const badge=document.getElementById('plantMediaBadge');
+
+  if(!wrap||!vid||!img)return;
+
+  // IMPORTANTE: no usar wrap.className porque MapLibre agrega sus propias
+  // clases al elemento del marker. Si las borramos, el marcador pierde
+  // el posicionamiento geográfico después de una actualización.
+  wrap.classList.remove('show','akzo','sli','balanza');
+  vid.classList.remove('show');
+  img.classList.remove('show');
+
+  let point=null;
+
+  if(label==='BALANZA'){
+    point=AKZO;
+    wrap.classList.add('show','akzo','balanza');
+    img.classList.add('show');
+    if(badge)badge.textContent='⚖️ BALANZA AKZO';
+    vid.pause();
+  }
+  else if(label==='CARGA AKZO'){
+    point=AKZO;
+    wrap.classList.add('show','akzo');
+    vid.classList.add('show');
+    if(badge)badge.textContent='🏗️ CARGANDO AKZO';
+    setPlantVideoSource(MEDIA_VIDEO_CARGA_AKZO);
+    vid.play().catch(()=>{});
+  }
+  else if(label==='DESCARGA SLI'){
+    point=SLI;
+    wrap.classList.add('show','sli');
+    vid.classList.add('show');
+    if(badge)badge.textContent='📦 DESCARGANDO SLI';
+    setPlantVideoSource(MEDIA_VIDEO_DESCARGA_SLI);
+    vid.play().catch(()=>{});
+  }
+  else{
+    vid.pause();
+    wrap.classList.remove('show','akzo','sli','balanza');
+    plantMediaTarget=null;
+    return;
+  }
+
+  if(point){
+    ensurePlantMediaMarker(point);
+  }
+}
+
+function bearingDeg(a,b){
+  const lon1=a[0]*Math.PI/180, lat1=a[1]*Math.PI/180;
+  const lon2=b[0]*Math.PI/180, lat2=b[1]*Math.PI/180;
+  const dLon=lon2-lon1;
+  const y=Math.sin(dLon)*Math.cos(lat2);
+  const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+  return (Math.atan2(y,x)*180/Math.PI+360)%360;
+}
+function ensureTruckMarker(lngLat){
+  if(!truckMarker){
+    const e=document.createElement('div');
+    e.className='markerTruck';
+
+    const img=document.createElement('img');
+    img.className='mapTruckImg';
+    img.id='mapTruckImg';
+    img.src=TRUCK_IMG_HACIA_SLI;
+    img.alt='Camión Grupo SLI';
+
+    e.appendChild(img);
+    truckMarker=new maplibregl.Marker({
+      element:e,
+      anchor:'center'
+    }).setLngLat(lngLat).addTo(map);
+  }else{
+    truckMarker.setLngLat(lngLat);
+  }
+  return truckMarker;
+}
+
+function setMapTruckDirection(dir){
+  if(!truckMarker)return;
+  const img=truckMarker.getElement().querySelector('#mapTruckImg');
+  if(!img)return;
+  const wanted=truckImageForDirection(dir);
+  if(img.src!==wanted) img.src=wanted;
+}
+
+function setTruckHeadingOnRoute(def,p,dir){
+  if(!truckMarker)return;
+  // El globo queda siempre derecho. Solo cambiamos la vista del camión
+  // según el sentido general del viaje.
+  setMapTruckDirection(dir);
+  const img=truckMarker.getElement().querySelector('#mapTruckImg');
+  if(img) img.style.transform='none';
+}
+
+function resetTruckHeading(dir){
+  if(!truckMarker)return;
+  setMapTruckDirection(dir);
+  const img=truckMarker.getElement().querySelector('#mapTruckImg');
+  if(img) img.style.transform='none';
+}
+
+function render(data){
+  const r=data.resumen||{}, c=(data.camiones||[])[0]||{};
+  if(!Number.isFinite(+c.lat)||!Number.isFinite(+c.lon))return;
+
+  const state=currentOperationalState(c);
+  const prog=+r.viajesProgramadosTms||0, ok=+r.viajesCompletosGps||0, run=+r.viajesEnCursoGps||0, pend=+r.viajesPendientes||0;
+  CURRENT_PROGRAMMED_TRIPS=prog;
+  CURRENT_STARTED_TRIPS=Math.max(0,ok+run);
+  const progEl=document.getElementById('prog');
+  progEl.textContent=prog;
+  document.getElementById('ok').style.width=(prog?ok/prog*100:0)+'%';
+  document.getElementById('run').style.width=(prog?run/prog*100:0)+'%';
+  document.getElementById('pend').style.width=(prog?pend/prog*100:100)+'%';
+  document.getElementById('barTxt').textContent=`${ok} completos · ${run} en curso · ${pend} pendientes`;
+  document.getElementById('sub').textContent=`Última posición GPS: ${c.horaGps||'--:--:--'}`;
+
+  // Inside AKZO/SLI, do not pretend the truck is still on the road.
+  if(state.kind==='PLANT'){
+    showPlantMedia(state.label);
+    document.getElementById('status').textContent=`${state.emoji} ${state.label}`;
+    document.getElementById('km').textContent='--';
+    document.getElementById('eta').textContent='--';
+    document.getElementById('arr').textContent='--';
+    document.getElementById('adv').textContent='--%';
+    document.getElementById('truckRailLabel').textContent=state.label;
+
+    // Put truck at the relevant endpoint on top strip.
+    const atAkzo = state.label.includes('AKZO') || state.label==='BALANZA';
+    const x=atAkzo?0:100;
+    const rr=document.getElementById('remainRail');
+    rr.style.left='0'; rr.style.width='0';
+    setTruckRailPosition(x);
+    const plantDir=atAkzo?'AKZO_SLI':'SLI_AKZO';
+    setTruckRailDirection(plantDir);
+    document.getElementById('truckRailLabel').style.left=x+'%';
+
+    // Map shows real GPS while in plant; no fake remaining-route calculation.
+    if(map?.getSource('total')){
+      map.getSource('total').setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
+      map.getSource('remain').setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
+    }
+    ensureTruckMarker([+c.lon,+c.lat]);
+    resetTruckHeading(plantDir);
+
+    const center=atAkzo?[AKZO.lon,AKZO.lat]:[SLI.lon,SLI.lat];
+    const plantViewKey=(atAkzo?'AKZO':'SLI')+'|'+state.label;
+
+    // Centrar una sola vez cuando cambia el estado/planta.
+    // Si el usuario después hace zoom o mueve el mapa, las siguientes
+    // actualizaciones del JSON NO le pisan esa vista.
+    if(lastPlantViewKey!==plantViewKey){
+      lastPlantViewKey=plantViewKey;
+      map?.easeTo({center,zoom:14.4,pitch:52,bearing:-20,duration:650});
+    }
+    document.getElementById('routeBadge').textContent=`${state.label} · posición GPS real`;
+    document.getElementById('debug').textContent=
+      `ESTADO OPERATIVO: ${state.label}\n`+
+      `EVENTO ABIERTO: ${state.event?.evento||state.event?.movimiento||'--'}\n`+
+      `BACKEND fase: ${c.fase||'--'}\nBACKEND sentido: ${c.sentido||'--'}\n`+
+      `GPS: ${(+c.lat).toFixed(5)}, ${(+c.lon).toFixed(5)}`;
+    lastGps={lat:+c.lat,lon:+c.lon};
+    document.getElementById('sync').textContent=(data.actualizado||'').slice(-8);
+    return;
+  }
+
+  showPlantMedia(null);
+  lastPlantViewKey=null;
+
+  // Road state.
+  const dir=state.dir||inferDirection(c), def=ROUTES[dir], p=project(+c.lat,+c.lon,def.c);
+  if(!p)return;
+  const progress=Math.max(0,Math.min(100,p.walk/p.total*100)), remaining=100-progress;
+  const label=state.label||`EN RUTA A ${def.destino}`;
+  document.getElementById('status').textContent='🚚 '+label;
+  document.getElementById('km').textContent=(p.remain/1000).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})+' km';
+  const eta=Math.max(1,Math.round(def.mins*(p.remain/p.total)));
+  document.getElementById('eta').textContent=eta+' min';
+  document.getElementById('arr').textContent=new Date(Date.now()+eta*60000).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit',hour12:false});
+  document.getElementById('adv').textContent=Math.round(progress)+'%';
+
+  const x=dir==='AKZO_SLI'?progress:100-progress, rr=document.getElementById('remainRail');
+  if(dir==='AKZO_SLI'){rr.style.left=x+'%';rr.style.width=remaining+'%'}else{rr.style.left='0';rr.style.width=x+'%'}
+  setTruckRailPosition(x);
+  setTruckRailDirection(dir);
+  document.getElementById('truckRailLabel').style.left=x+'%';
+  document.getElementById('truckRailLabel').textContent=label;
+
+  if(map?.getSource('total')){
+    map.getSource('total').setData(routeGeo(def.c));
+    map.getSource('remain').setData(routeGeo(p.remainCoords));
+    const b=def.c.reduce((bb,q)=>bb.extend(q),new maplibregl.LngLatBounds(def.c[0],def.c[0]));
+    map.fitBounds(b,{padding:45,pitch:52,bearing:-20,duration:500});
+  }
+  ensureTruckMarker([p.lon,p.lat]);
+  setTruckHeadingOnRoute(def,p,dir);
+
+  document.getElementById('routeBadge').textContent=`${def.origen} → ${def.destino} · GPS a ${Math.round(p.off)} m de la traza`;
+  const pDbgAS=project(+c.lat,+c.lon,ROUTES.AKZO_SLI.c),pDbgSA=project(+c.lat,+c.lon,ROUTES.SLI_AKZO.c);
+  document.getElementById('debug').textContent=`AUTO: ${autoDirection||'--'}\nUSADO: ${dir}\nOFFSET AKZO→SLI: ${pDbgAS?Math.round(pDbgAS.off):'--'} m\nOFFSET SLI→AKZO: ${pDbgSA?Math.round(pDbgSA.off):'--'} m\nBACKEND fase: ${c.fase||'--'}\nBACKEND sentido: ${c.sentido||'--'}\nBACKEND destino: ${c.ruta?.destino||'--'}\nGPS: ${(+c.lat).toFixed(5)}, ${(+c.lon).toFixed(5)}\nOFFSET USADO: ${Math.round(p.off)} m`;
+  lastGps={lat:+c.lat,lon:+c.lon};
+  document.getElementById('sync').textContent=(data.actualizado||'').slice(-8)
+}
+
+async function load(){
+  if(SIM_MODE!=='LIVE')return;
+  try{
+    const u=API+'?action=dashboard-json&_='+Date.now();
+    const j=await (await fetch(u,{cache:'no-store'})).json();
+    if(!j.ok) throw Error(j.error||'API cache error');
+
+    const paquete=j.data||{};
+    if(!paquete.operacion) throw Error('JSON cache sin bloque operacion');
+
+    LAST_TRIPS_DATA=paquete.viajes||null;
+    render(paquete.operacion);
+    if(paquete.viajes) renderTrips(paquete.viajes);
+
+    const cacheStamp=paquete.generado||paquete.operacion.actualizado||'';
+    const dbg=document.getElementById('debug');
+    if(dbg && cacheStamp){
+      dbg.textContent += `\nJSON CACHE: ${cacheStamp}`;
+    }
+  }catch(e){
+    document.getElementById('debug').textContent='ERROR CACHE: '+e.message;
+  }
+}
 function secBetween(a,b){if(!a||!b)return null;const pa=String(a).split(':').map(Number),pb=String(b).split(':').map(Number);if(pa.length<2||pb.length<2)return null;let sa=(pa[0]||0)*3600+(pa[1]||0)*60+(pa[2]||0),sb=(pb[0]||0)*3600+(pb[1]||0)*60+(pb[2]||0);if(sb<sa)sb+=86400;return sb-sa}
 function minsBetween(a,b){const s=secBetween(a,b);return s==null?'--':Math.round(s/60)}
-function eventClass(n){const x=String(n||'').toLowerCase();if(x.includes('ruta'))return'ruta';if(x.includes('puerta')||x.includes('entrada')||x.includes('salida'))return'puerta';return'carga'}
+function eventClass(n){
+  const x=String(n||'');
+  if(x.toLowerCase().includes('ruta'))return'ruta';
+  if(x.toLowerCase().includes('puerta')||x.toLowerCase().includes('entrada')||x.toLowerCase().includes('salida'))return'puerta';
+  return'carga';
+}
 function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function renderTrips(data){const box=document.getElementById('trips'),cam=(data.camiones||[])[0]||{},viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(b.n||b.id||0)-Number(a.n||a.id||0));FIRST_AKZO_TIME=firstAkzoTimeFromTrips(data);updateOperationalTimers();if(!viajes.length){box.innerHTML='<div class="trip"><div class="trip-head"><div class="trip-sub">No hay viajes guardados todavía.</div></div></div>';return}box.innerHTML=viajes.map((v,idx)=>{const n=v.n||v.id||idx+1,enCurso=!v.completo&&!v.fin,fin=v.fin||'EN CURSO';let badge;if(enCurso&&v.inicio)badge=`EN CURSO · <span class="live-duration" data-live-start="${esc(v.inicio)}" data-live-unit=" min">--</span>`;else{const dur=v.fin?minsBetween(v.inicio,v.fin):'--';badge=`${v.completo?'COMPLETO':'EN CURSO'} · ${esc(dur)} min`}const eventos=(v.eventos||[]).slice().reverse();return`<div class="trip ${idx===0?'open':''}"><div class="trip-head" onclick="this.parentElement.classList.toggle('open')"><div><div class="trip-title">Viaje #${esc(n)}</div><div class="trip-sub">${esc(v.inicio||'--')} a ${esc(fin)}</div></div><div class="trip-badge">${badge}</div></div><div class="trip-body"><ul class="timeline">${eventos.map(e=>{const nom=e.evento||e.movimiento||'Evento',ini=e.inicio||'--',abierto=Boolean(e.inicio&&!e.fin);let textoTiempo,badgeEvento;if(abierto){textoTiempo=`${esc(ini)} a En curso (<span class="live-now" data-live-now>--:--:--</span>)`;badgeEvento=`<span data-live-start="${esc(ini)}" data-live-unit="m">--</span>`}else{const ff=e.fin||'--',m=e.fin?minsBetween(e.inicio,e.fin):'--';textoTiempo=`${esc(ini)} a ${esc(ff)}`;badgeEvento=`${esc(m)}${m==='--'?'':'m'}`}return`<li class="${eventClass(nom)}"><div class="event"><div><div class="event-name">${esc(nom)}</div><div class="event-time">${textoTiempo}</div></div><div class="trip-badge">${badgeEvento}</div></div></li>`}).join('')}</ul></div></div>`}).join('');updateOperationalTimers()}
-setInterval(()=>{document.getElementById('clock').textContent=new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());updateOperationalTimers()},1000);
-window.onload=()=>{initMap();load();updateOperationalTimers();setInterval(load,10000)};
+function renderTrips(data){
+  const box=document.getElementById('trips');
+  const cam=(data.camiones||[])[0]||{};
+  const viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(b.n||b.id||0)-Number(a.n||a.id||0));
+
+  FIRST_AKZO_TIME=firstAkzoTimeFromTrips(data);
+  updateOperationalTimers();
+
+  if(!viajes.length){
+    box.innerHTML='<div class="trip"><div class="trip-head"><div class="trip-sub">No hay viajes guardados todavía.</div></div></div>';
+    return;
+  }
+
+  box.innerHTML=viajes.map((v,idx)=>{
+    const n=v.n||v.id||idx+1;
+    const enCurso=!v.completo && !v.fin;
+    const fin=v.fin||'EN CURSO';
+
+    let badge;
+    if(enCurso && v.inicio){
+      badge=`EN CURSO · <span class="live-duration" data-live-start="${esc(v.inicio)}" data-live-unit=" min">--</span>`;
+    }else{
+      const dur=v.fin?minsBetween(v.inicio,v.fin):'--';
+      badge=`${v.completo?'COMPLETO':'EN CURSO'} · ${esc(dur)} min`;
+    }
+
+    const eventos=(v.eventos||[]).slice().reverse();
+
+    return `<div class="trip ${idx===0?'open':''}">
+      <div class="trip-head" onclick="this.parentElement.classList.toggle('open')">
+        <div>
+          <div class="trip-title">Viaje #${esc(n)}</div>
+          <div class="trip-sub">${esc(v.inicio||'--')} a ${esc(fin)}</div>
+        </div>
+        <div class="trip-badge">${badge}</div>
+      </div>
+      <div class="trip-body">
+        <ul class="timeline">
+          ${eventos.map(e=>{
+            const nom=e.evento||e.movimiento||'Evento';
+            const ini=e.inicio||'--';
+            const abierto=Boolean(e.inicio && !e.fin);
+
+            let textoTiempo;
+            let badgeEvento;
+
+            if(abierto){
+              textoTiempo=`${esc(ini)} a En curso (<span class="live-now" data-live-now>--:--:--</span>)`;
+              badgeEvento=`<span data-live-start="${esc(ini)}" data-live-unit="m">--</span>`;
+            }else{
+              const ff=e.fin||'--';
+              const m=e.fin?minsBetween(e.inicio,e.fin):'--';
+              textoTiempo=`${esc(ini)} a ${esc(ff)}`;
+              badgeEvento=`${esc(m)}${m==='--'?'':'m'}`;
+            }
+
+            return `<li class="${eventClass(nom)}">
+              <div class="event">
+                <div>
+                  <div class="event-name">${esc(nom)}</div>
+                  <div class="event-time">${textoTiempo}</div>
+                </div>
+                <div class="trip-badge">${badgeEvento}</div>
+              </div>
+            </li>`;
+          }).join('')}
+        </ul>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateOperationalTimers();
+}
+
+setInterval(()=>{
+  document.getElementById('clock').textContent=new Intl.DateTimeFormat('es-AR',{
+    timeZone:'America/Argentina/Buenos_Aires',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+  }).format(new Date());
+  updateOperationalTimers();
+},1000);
+
+document.getElementById('override').addEventListener('change',()=>{
+  autoDirection=null;
+  lastGps=null;
+  load();
+});
+
+window.onload=()=>{
+  initMap();
+  load();
+  updateOperationalTimers();
+  setInterval(load,10000);
+};
 </script>
 </body></html>
