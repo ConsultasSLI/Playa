@@ -327,6 +327,25 @@ html[data-theme="dark"][data-palette="mono"]{--bg:#171717;--card:#252525;--borde
 html[data-theme="dark"][data-palette="mono"] body{background:linear-gradient(135deg,#151515,#262626)}html[data-theme="dark"][data-palette="mono"] .side,html[data-theme="dark"][data-palette="mono"] .fleet-planner{background:#2d2d2d}html[data-theme="dark"][data-palette="mono"] .trip,html[data-theme="dark"][data-palette="mono"] .event{background:#303030;border-color:#555}html[data-theme="dark"][data-palette="mono"] .trip-body{background:#202020}html[data-theme="dark"][data-palette="mono"] .trip-badge{background:#404040;border-color:#666;color:#eee}html[data-theme="dark"][data-palette="mono"] .vehicle-turn-progress,html[data-theme="dark"][data-palette="mono"] .fleet-track{background:#505050}html[data-theme="dark"][data-palette="mono"] .turn-complete{background:#dedede}html[data-theme="dark"][data-palette="mono"] .rail-stage.done{background:#444;color:#eee}html[data-theme="dark"][data-palette="mono"] .rail-stage.done .stage-icon{background:#eee;color:#222}
 @media(max-width:650px){.fleet-planner{padding:9px 15px 6px}.overview .routeStrip{padding:7px 15px}.rail-stage{font-size:9px}#themeSelect{max-width:195px}}
 
+/* Prevent rail contents from imposing an intrinsic width on narrow screens. */
+.overview,.overview .routeStrip,.fleet-rails,.fleet-rail,.rail-summary,.fleet-route,.fleet-track,.rail-stages{min-width:0;max-width:100%}
+.fleet-rails{grid-template-columns:minmax(0,1fr)}
+.fleet-rail{box-sizing:border-box;width:100%}
+.fleet-route{grid-template-columns:50px minmax(0,1fr) 40px}
+@media(max-width:650px){
+  .overview .routeStrip{padding:8px 12px}
+  .fleet-rail{padding:9px 10px}
+  .rail-summary{display:flex;flex-wrap:wrap;gap:5px 8px;white-space:normal}
+  .rail-summary b{flex:none}
+  .rail-trip-title{font-size:9px}
+  .rail-summary .rail-state{flex-wrap:wrap;font-size:9px}
+  .rail-summary small{margin-left:auto;white-space:normal}
+  .fleet-route{grid-template-columns:38px minmax(0,1fr) 28px;gap:8px;margin:14px 0 12px}
+  .rail-truck{width:48px;max-width:none}
+  .rail-stages{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;overflow:visible;margin-top:8px}
+  .rail-stage{display:flex;align-items:center;gap:3px;white-space:normal;min-width:0;line-height:1.3;font-size:9px;padding:5px 4px}
+  .rail-stage .stage-icon{flex:0 0 13px;width:13px;height:13px;margin-right:0}
+}
 </style>
 </head>
 <body>
