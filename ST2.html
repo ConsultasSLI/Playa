@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Logística Interplanta · Shuttle</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.css">
 <style>
@@ -163,17 +163,181 @@
   }
 }
 
+
+.signalbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;margin-bottom:12px;background:#111d2b;border:1px solid #2a3b55;border-radius:12px}
+.signal-title{font-size:13px;font-weight:800;display:flex;gap:9px;align-items:center}.signal-dot{width:8px;height:8px;border-radius:50%;background:var(--signal,#64748b);box-shadow:0 0 12px var(--signal,#64748b)}
+.signal-detail{font-size:12px;color:#cbd5e1;margin-top:5px}.signal-meta{font-size:11px;color:#94a3b8;text-align:right;line-height:1.7}.signalbar.good{--signal:#00e676}.signalbar.warn{--signal:#f59e0b}.signalbar.bad{--signal:#fb7185}
+.journey{padding:16px 18px;border-bottom:1px solid var(--border)}.journey-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.journey-title{font-size:11px;font-weight:900;letter-spacing:1px;color:#94a3b8}.journey-current{font-size:13px;color:var(--green);font-weight:800}
+.journey-stages{display:grid;grid-template-columns:repeat(8,minmax(82px,1fr));gap:6px;overflow-x:auto;padding-bottom:4px}.journey-stage{background:#0e1726;border:1px solid #28364b;border-radius:8px;padding:10px 7px;color:#94a3b8;font-size:11px;text-align:center;white-space:nowrap}.journey-stage b{display:block;font-size:16px;margin-bottom:5px}.journey-stage.done{color:#cbd5e1;border-color:#315046}.journey-stage.current{color:#fff;border-color:#00e676;background:#12382f;box-shadow:0 0 14px #00e67615}.journey-stage.current b{color:var(--green)}
+.map-follow{position:absolute;top:12px;left:12px;z-index:6;background:#0b1220ed;border:1px solid #00e676;color:#00e676;padding:10px 13px;border-radius:9px;cursor:pointer;font-weight:800;font-size:12px}.map-follow[aria-pressed="false"]{color:#cbd5e1;border-color:#64748b}.map-hint{position:absolute;bottom:54px;left:12px;z-index:5;background:#0b1220dd;color:#cbd5e1;border-radius:7px;padding:6px 9px;font-size:11px;pointer-events:none}
+.event.live-event{border-color:#00e676;background:#123027}.live-tag{display:inline-block;font-size:9px;letter-spacing:.7px;color:#00e676;margin-left:8px}.live-tag:before{content:'●';margin-right:4px;animation:livePulse 2s infinite}@keyframes livePulse{50%{opacity:.4}}
+.preview-tools{display:none;background:#17243a;border:1px dashed #577598;border-radius:10px;padding:10px 14px;margin-bottom:12px;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px}.preview-tools button{background:#0b1220;border:1px solid #516582;color:#fff;border-radius:6px;padding:7px 9px;cursor:pointer}.preview-tools button[aria-pressed="true"]{border-color:#00e676;color:#00e676}.preview-tools a{color:#67e8f9;margin-left:auto}.preview-tools.show{display:flex}
+@media(max-width:650px){.signalbar{align-items:flex-start;gap:10px}.signal-meta{font-size:10px}.journey-head{align-items:flex-start;flex-direction:column}.title{font-size:23px}.top{flex-wrap:wrap}.journey-stages{grid-template-columns:repeat(8,88px)}}
+@media(prefers-reduced-motion:reduce){.live-tag:before{animation:none}.truck{transition:none}}
+
+
+/* Laboratory identity: paper, graphite and industrial orange. */
+:root{--bg:#eeece6;--card:#faf9f5;--border:#d9d6cc;--green:#bb4926;--gray:#817f77;--text:#232a2b;--dim:#676c6a;--cyan:#39766f}
+body{background:var(--bg);font-family:"Segoe UI",Arial,sans-serif;color:var(--text)}
+.wrap{max-width:1500px;padding:18px 24px}.top{margin-bottom:14px;align-items:center}.brand-eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:#8a4c36;margin-bottom:4px}.title{font-size:29px;font-weight:650;letter-spacing:-1px}.title span{font-weight:350}.top .muted{font-size:10px;letter-spacing:1.25px;margin-top:4px}.head{padding:8px 16px;border:0;border-left:1px solid var(--border);background:transparent;border-radius:0}.clock{font-size:25px;color:#232a2b;font-weight:600;font-variant-numeric:tabular-nums}
+.card{border-radius:9px}.monitor-card{overflow:hidden;box-shadow:0 10px 30px #33382d08;border-top:3px solid #d3673f}
+.signalbar{padding:9px 14px;margin-bottom:12px;background:#f8f7f1;border-color:var(--border);border-radius:6px;border-left:3px solid var(--signal,#817f77)}.signal-title{font-size:11px;letter-spacing:.5px}.signal-detail{font-size:11px;color:#72756d;margin-top:3px}.signal-meta{color:#72756d;font-size:10px}.signalbar.good{--signal:#348064}.signalbar.warn{--signal:#b17a18}.signalbar.bad{--signal:#bf4b44}
+.grid{grid-template-columns:minmax(0,1fr) 290px;min-height:520px}.mapwrap{grid-column:1;grid-row:1;min-width:0}.side{grid-column:2;grid-row:1;border-right:0;border-left:1px solid var(--border);padding:22px 20px;background:#f5f3ed}.side>.muted:first-child{font-size:10px;letter-spacing:1.5px;font-weight:800}.status{font-size:25px;line-height:1.2;letter-spacing:-.7px;margin:12px 0;color:#bb4926}.side #sub{font-size:11px;line-height:1.6}.kpis{margin-top:24px;gap:0;border:0;background:transparent;border-radius:0}.kpi{background:transparent;padding:17px 6px;border-bottom:1px solid var(--border);text-align:left}.kpi:nth-child(odd){border-right:1px solid var(--border)}.kpi:nth-child(even){padding-left:16px}.kpi b{font-size:26px;font-weight:650;letter-spacing:-.8px}.kpi small{font-size:9px;letter-spacing:.5px;color:#787e76}.operation-time{margin-top:24px;padding-top:20px}.operation-box{background:transparent;border:0;padding:0;text-align:left}.operation-label{color:#72766d;font-size:9px}.operation-value{color:#232a2b;font-size:31px;font-weight:400;letter-spacing:-1px}.operation-sub{color:#888b81}
+.map-follow{background:#fcfaf3f5;border:1px solid #c95d35;color:#a44022;box-shadow:0 3px 12px #00000012;border-radius:5px;padding:10px 14px}.map-follow[aria-pressed="false"]{background:#fcfaf3f5;color:#46504b;border-color:#939b91}.map-hint{background:#fcfaf3ed;color:#576057;border:1px solid #d9d6cc;border-radius:4px}.badge{background:#252f2eee;color:#f8f7ed;border:0;border-radius:4px;font-size:11px}.plant{background:#fffdf2ee;border-color:#d06a44;color:#313936;border-radius:5px}.markerTruck{border-color:#c45d36;box-shadow:0 0 0 7px #c45d361a,0 8px 18px #00000030}
+.planner{padding:18px 20px;border-top:1px solid var(--border);border-bottom:0;background:#f7f5ef}.progress{height:20px;background:#e3e2d8}.seg-ok{background:#789983}.seg-run{background:#d8794b}.seg-pend{background:#e3e2d8}.progress span{color:#26302b;font-size:11px}.planner-footer{font-size:12px}.projection{color:#56735c}.projection.warn{color:#a26913}.rhythm{color:#586c61}
+.journey{border-top:1px solid var(--border);border-bottom:0;padding:16px 20px}.journey-title{color:#787c71;font-size:10px}.journey-current{color:#a34527;font-size:12px}.journey-stage{background:transparent;border-color:#dddcd2;color:#8b8c81;border-radius:5px}.journey-stage.done{color:#607064;border-color:#cdd7c8;background:#f0f3eb}.journey-stage.current{color:#713822;border-color:#cf744e;background:#faeee0;box-shadow:none}.journey-stage.current b{color:#c45d36}
+.routeStrip{padding:19px 30px;border-top:1px solid var(--border);border-bottom:0}.ep{font-size:12px;letter-spacing:1.4px;color:#4a514b}.rail{background:#dddcd0;height:6px}.remain{background:#c6744d;box-shadow:none}
+.trips{margin-top:10px}.section-title{color:#61695e;letter-spacing:1.5px;font-size:10px;margin-top:24px}.trip{background:#faf9f5;border-color:var(--border);border-radius:7px}.trip-title{color:#2b3630;font-size:16px}.trip-badge{background:#efeee6;color:#555f54;border-color:#d4d6c9;border-radius:4px;font-size:11px}.trip-body{background:#f4f3eb;border-color:var(--border)}.timeline{border-color:#ced3c4}.timeline li:before{border-color:#f4f3eb;background:#959e8d}.event{background:#faf9f3;border-color:#dbded0;border-radius:5px}.event.live-event{background:#fbf0e3;border-color:#ce825b}.live-tag{color:#ad4d29}.event-time{color:#788071}.plant-media-card{border-color:#d06a44;box-shadow:0 14px 34px #00000042}
+.preview-tools{background:#e8e5d9;border-color:#bab9aa;color:#6b7165;padding:7px 12px;border-radius:5px;font-size:10px}.preview-tools button{background:#f8f7ef;border-color:#c9cabc;color:#606b5f;padding:5px 8px;font-size:10px}.preview-tools button[aria-pressed="true"]{border-color:#c56c42;color:#a24a27}.preview-tools a{color:#596f5c}
+@media(max-width:900px){.wrap{padding:14px}.grid{grid-template-columns:minmax(0,1fr) 245px}.side{padding:18px 14px}.status{font-size:22px}#map{height:520px}.kpi b{font-size:23px}}
+@media(max-width:650px){.wrap{padding:12px}.top{gap:8px;margin-bottom:10px}.title{font-size:26px}.head{padding:5px 0;border:0}.clock{font-size:20px}.grid{grid-template-columns:1fr;min-height:0}.mapwrap{grid-column:1;grid-row:1}.side{grid-column:1;grid-row:2;border-left:0;border-top:1px solid var(--border);border-bottom:0;padding:16px}.side .status{margin:8px 0}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:14px}.kpi{padding:8px!important;border-bottom:0;border-right:1px solid var(--border)}.kpi:last-child{border-right:0}.kpi b{font-size:20px}.kpi small{font-size:8px}.operation-time{margin-top:14px;padding-top:12px}.operation-value{font-size:25px}#map{height:420px}.planner{padding:15px}.planner>div:first-child{gap:12px;flex-wrap:wrap;font-size:12px}.journey{padding:15px}.routeStrip{padding:18px 22px}}
+
+
+.overview{display:grid;grid-template-columns:1fr 1fr;background:var(--card)}.overview .planner{grid-column:1;grid-row:1;border:0;padding:14px 20px;background:transparent}.overview .journey{grid-column:2;grid-row:1;border-top:0;border-left:1px solid var(--border);padding:14px 20px}.overview .journey-head{margin-bottom:10px}.overview .journey-stages{grid-template-columns:repeat(8,minmax(65px,1fr));gap:4px;padding:0}.overview .journey-stage{font-size:9px;padding:7px 3px}.overview .journey-stage b{font-size:13px;margin-bottom:3px}.overview .routeStrip{grid-column:1 / -1;padding:15px 26px 18px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}.overview .planner>div:first-child{gap:12px;font-size:12px;flex-wrap:wrap}.overview .planner-footer{font-size:11px;margin-top:8px}.overview .progress{margin-top:8px!important}
+.side-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px;font-size:10px;letter-spacing:1px;font-weight:800;color:var(--dim)}#themeToggle{background:transparent;color:var(--text);border:1px solid var(--border);border-radius:5px;padding:7px 9px;cursor:pointer;font:11px "Segoe UI",Arial,sans-serif;letter-spacing:0;white-space:nowrap}#themeToggle:hover{border-color:var(--green)}#themeToggle:focus-visible{outline:2px solid var(--green);outline-offset:3px}.map-clocks{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border)}.map-clocks small{font-size:8px;color:var(--dim);letter-spacing:.6px;font-weight:800}.map-clocks .clock{font-size:23px;margin-top:5px}.map-clocks #sync{font-size:18px;margin-top:8px;font-variant-numeric:tabular-nums}.side{padding:16px 18px}.side .kpis{margin-top:15px}.side .kpi{padding-top:13px;padding-bottom:13px}.side .operation-time{margin-top:18px;padding-top:16px}
+.mapwrap>.signalbar{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:12px;min-height:32px;margin:0;padding:7px 12px;border:0;border-top:1px solid var(--border);border-radius:0;background:var(--card);font-size:10px;overflow-x:auto;white-space:nowrap}.signalbar>div:first-child{display:contents}.mapwrap .signal-title{flex:none;font-size:10px;letter-spacing:0;gap:6px}.mapwrap .signal-detail{display:none}.mapwrap .signal-meta{display:flex;gap:12px;font-size:10px;line-height:1;text-align:left}.mapwrap .signal-dot{width:6px;height:6px;box-shadow:none}.mapwrap .badge{bottom:44px}.mapwrap .map-hint{bottom:82px}
+html[data-theme="dark"]{color-scheme:dark;--bg:#1b211f;--card:#252d29;--border:#424a40;--text:#f0eee4;--dim:#b0b7a8;--green:#e2986d;--cyan:#9cbfb0}
+html[data-theme="dark"] .monitor-card{border-top-color:#d8885e;box-shadow:0 10px 30px #00000020}
+html[data-theme="dark"] .side{background:#222a25}
+html[data-theme="dark"] .status,html[data-theme="dark"] .journey-current,html[data-theme="dark"] .live-tag{color:#efaa7b}
+html[data-theme="dark"] .clock,html[data-theme="dark"] .operation-value,html[data-theme="dark"] .trip-title,html[data-theme="dark"] .ep{color:var(--text)}
+html[data-theme="dark"] .kpi small,html[data-theme="dark"] .operation-label,html[data-theme="dark"] .operation-sub,html[data-theme="dark"] .journey-title,html[data-theme="dark"] .section-title,html[data-theme="dark"] .event-time,html[data-theme="dark"] .signal-meta{color:var(--dim)}
+html[data-theme="dark"] .progress,html[data-theme="dark"] .seg-pend,html[data-theme="dark"] .rail{background:#414b40}
+html[data-theme="dark"] .progress span{color:#fff9e9;text-shadow:0 1px 2px #0008}
+html[data-theme="dark"] .rhythm,html[data-theme="dark"] .projection{color:#a6c4ab}
+html[data-theme="dark"] .projection.warn{color:#e6bb6d}
+html[data-theme="dark"] .journey-stage{color:#a9afa0;border-color:var(--border)}
+html[data-theme="dark"] .journey-stage.done{background:#2f3d30;color:#bccab4;border-color:#4f624a}
+html[data-theme="dark"] .journey-stage.current{background:#49372b;color:#f6d6b9;border-color:#d59065}
+html[data-theme="dark"] .journey-stage.current b{color:#efaa7b}
+html[data-theme="dark"] .map-follow,html[data-theme="dark"] .map-hint{background:#252d29f5;color:#f2c29f;border-color:#a57856}
+html[data-theme="dark"] .map-follow[aria-pressed="false"]{color:#d0d6c8;border-color:#788573}
+html[data-theme="dark"] .plant{background:#252d29f2;color:#f3ebd9;border-color:#d8885e}
+html[data-theme="dark"] .trip{background:var(--card);border-color:var(--border)}
+html[data-theme="dark"] .trip-body{background:#202922}
+html[data-theme="dark"] .trip-badge{background:#354031;color:#d4ddc9;border-color:#53614b}
+html[data-theme="dark"] .timeline{border-color:#53614b}
+html[data-theme="dark"] .timeline li:before{border-color:#202922}
+html[data-theme="dark"] .event{background:#2c352c;border-color:#46513f}
+html[data-theme="dark"] .event.live-event{background:#443427;border-color:#b58057}
+html[data-theme="dark"] .preview-tools{background:#30372c;border-color:#67705a;color:#c5cebb}
+html[data-theme="dark"] .preview-tools button{background:#232b22;color:#d5ddc9;border-color:#617054}
+html[data-theme="dark"] .preview-tools button[aria-pressed="true"]{color:#f1b688;border-color:#bd875f}
+html[data-theme="dark"] .preview-tools a{color:#b5cfac}
+@media(max-width:1000px){.overview{grid-template-columns:1fr}.overview .planner{grid-column:1;grid-row:1}.overview .journey{grid-column:1;grid-row:2;border-left:0;border-top:1px solid var(--border);padding-top:10px;padding-bottom:10px}.overview .routeStrip{grid-row:3}.overview .journey-stages{grid-template-columns:repeat(8,minmax(65px,1fr))}}
+@media(max-width:650px){.overview .planner{padding:12px 15px}.overview .journey{padding:10px 15px}.overview .journey-head{flex-direction:row;align-items:center;gap:8px}.overview .journey-title{font-size:9px}.overview .journey-current{font-size:10px}.overview .routeStrip{padding:15px 20px}.side-toolbar{margin-bottom:12px}.map-clocks{padding-bottom:12px;margin-bottom:12px}.map-clocks .clock{font-size:22px}.map-clocks #sync{font-size:18px}.mapwrap .signal-meta{gap:8px}.mapwrap>.signalbar{gap:8px;font-size:9px}}
+
+
+body,button,select{font-family:Manrope,"Segoe UI",Arial,sans-serif!important;-webkit-font-smoothing:antialiased}body{font-size:13px}.status{font-weight:600;letter-spacing:-.5px}.kpi b{font-weight:500}.clock,.operation-value{font-weight:500}.journey-title,.section-title,.operation-label{letter-spacing:.6px;font-weight:600}.ep,.trip-title,.event-name,.planner b{font-weight:600}.trip-badge,.signal-title{font-weight:500}.side-toolbar{font-weight:600}#themeToggle{font-family:inherit!important}
+.legacy-rail{display:none}.fleet-rails{display:grid;gap:10px}.fleet-rail{display:block;width:100%;background:transparent;color:var(--text);border:1px solid var(--border);border-left:3px solid var(--vehicle-color);border-radius:6px;padding:10px 14px;text-align:left;cursor:pointer}.fleet-rail.selected{border-color:var(--vehicle-color);background:color-mix(in srgb,var(--vehicle-color) 5%,var(--card))}.rail-summary{display:flex;align-items:center;gap:12px;font-size:11px;margin-bottom:15px}.rail-summary b{color:var(--vehicle-color);font-weight:600;font-size:12px}.rail-summary small{margin-left:auto;color:var(--dim);font-size:10px}.fleet-route{display:grid;grid-template-columns:50px 1fr 40px;gap:15px;align-items:center;font-size:10px;letter-spacing:.5px}.fleet-route>span:last-child{text-align:right}.fleet-track{position:relative;height:5px;border-radius:10px;background:var(--border)}.fleet-progress{position:absolute;height:5px;background:var(--vehicle-color);opacity:.45;border-radius:10px}.rail-truck{position:absolute;top:50%;transform:translate(-50%,-50%);width:60px;height:auto;filter:drop-shadow(0 2px 2px #0003)}
+.fleet-marker{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;padding:0;cursor:pointer;color:white;overflow:visible}.fleet-truck{display:flex;width:46px;height:46px;align-items:center;justify-content:center;border-radius:50%;background:#f2f0e8;border:3px solid var(--vehicle-color);box-shadow:0 3px 12px #0003}.fleet-truck .mapTruckImg{width:33px;height:auto}.fleet-plate{display:block;background:var(--vehicle-color);padding:4px 8px;border:1px solid #ffffff70;border-radius:4px;font:600 10px Manrope,Arial,sans-serif;white-space:nowrap;box-shadow:0 2px 7px #0003;margin-top:3px}.fleet-marker.selected .fleet-truck{box-shadow:0 0 0 4px color-mix(in srgb,var(--vehicle-color) 22%,transparent),0 3px 12px #0003}.show-fleet{position:absolute;top:12px;left:190px;z-index:6;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 12px;border-radius:5px;font-size:12px;cursor:pointer}.fleet-trips.multiple{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}.vehicle-trips{min-width:0}.vehicle-trips-head{display:flex;align-items:center;gap:8px;padding:12px 2px;border-top:2px solid var(--vehicle-color);margin-bottom:8px}.vehicle-trips-head b{color:var(--vehicle-color);font-weight:600}.vehicle-trips-head>span:last-child{margin-left:auto;color:var(--dim);font-size:11px}.vehicle-dot{width:7px;height:7px;border-radius:50%;background:var(--vehicle-color)}.vehicle-trips .trip-head{padding:12px}.vehicle-trips .trip-body{padding:12px}.vehicle-trips .event{gap:8px;padding:9px}.vehicle-trips .event-name{font-size:12px}.vehicle-trips .event-time{font-size:10px}.vehicle-trips .trip-title{font-size:14px}
+@media(max-width:650px){.fleet-trips.multiple{grid-template-columns:1fr}.rail-summary{flex-wrap:wrap;gap:5px 10px;font-size:10px}.rail-summary small{font-size:9px}.show-fleet{left:auto;right:52px;padding:10px 9px;font-size:10px}.map-follow{font-size:10px;padding:10px}.fleet-rail{padding:10px}.overview .routeStrip{padding:10px 15px}}
+
+
+.overview{display:block}.legacy-panel{display:none!important}.fleet-planner{padding:14px 20px 10px}.fleet-planner-title{font-size:12px;font-weight:600;margin-bottom:10px}.vehicle-planner{padding:8px 0;border-top:1px solid var(--border)}.vehicle-planner-line{display:flex;align-items:center;gap:16px;font-size:11px;color:var(--dim)}.vehicle-planner-line>b{color:var(--vehicle-color);min-width:88px;font-size:12px;font-weight:600}.vehicle-planner-line strong{font-weight:600;color:var(--text)}.vehicle-rhythm{margin-left:auto}.vehicle-projection{font-size:10px}.vehicle-projection.warn{color:#b57a20}.vehicle-turn-progress{height:4px;margin-top:8px;display:flex;background:var(--border);overflow:hidden;border-radius:10px}.turn-complete{background:#809889}.turn-running{background:var(--vehicle-color)}.overview .routeStrip{padding:10px 20px 12px}.rail-summary{margin-bottom:14px}.rail-trip-title{font-size:10px;letter-spacing:.3px;color:var(--text)}.rail-state{color:var(--vehicle-color);font-size:10px;display:flex;gap:8px}.rail-stages{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:13px;overflow-x:auto}.rail-stage{color:var(--dim);white-space:nowrap;font-size:9px;font-weight:400;opacity:.65;padding:4px 6px;border-radius:4px}.rail-stage.current{color:var(--vehicle-color);background:color-mix(in srgb,var(--vehicle-color) 10%,transparent);font-weight:600;opacity:1}.rail-stage>span{font-size:10px}.fleet-rail{padding:9px 13px}.rail-summary small{font-size:9px}html[data-theme="dark"] .vehicle-projection.warn{color:#e2b777}
+@media(max-width:1000px){.vehicle-planner-line{flex-wrap:wrap;gap:7px 14px}.vehicle-rhythm{margin-left:0}.vehicle-projection{margin-left:auto}.rail-summary{flex-wrap:wrap;gap:7px 12px}.rail-stages{justify-content:flex-start}}
+@media(max-width:650px){.fleet-planner{padding:12px 15px 8px}.vehicle-planner-line{font-size:10px;gap:6px 10px}.vehicle-planner-line>b{min-width:auto}.vehicle-projection{margin-left:0}.rail-state{font-size:9px}.rail-summary small{margin-left:0}.overview .routeStrip{padding:8px 15px 10px}}
+
+
+/* More expressive surfaces and brighter vehicle colors in both themes. */
+:root{--bg:#e9eff5;--card:#ffffff;--border:#cedbe8;--text:#172943;--dim:#586e87;--green:#d65b20;--cyan:#008eaa}
+body{font-family:Manrope,"Segoe UI",Arial,sans-serif!important;background:linear-gradient(135deg,#f2f6fb 0%,#e6f1f6 55%,#f9efe8 100%);background-attachment:fixed}
+.monitor-card{border-top-color:#f07836;box-shadow:0 8px 32px #244d7412}.fleet-planner{background:linear-gradient(100deg,#fff6ed,#eef9fc)}.fleet-planner-title{color:#293e5c;font-weight:800;letter-spacing:.15px}.vehicle-planner{border-color:#d8e5ef}.side{background:linear-gradient(170deg,#f1f7fd,#eef8fa)}.status{color:#d85a20;font-weight:700}.clock,.operation-value{color:#173d67}.kpi b{color:#173d67;font-weight:600}.kpi small{color:#546e8a}.map-clocks small{color:#55728e}.fleet-rail{background:linear-gradient(95deg,color-mix(in srgb,var(--vehicle-color) 7%,white),#fff)}.fleet-rail.selected{background:linear-gradient(95deg,color-mix(in srgb,var(--vehicle-color) 13%,white),#fff);box-shadow:0 2px 9px color-mix(in srgb,var(--vehicle-color) 12%,transparent)}.fleet-track{background:#d2e1ef}.fleet-progress{opacity:.85}.rail-stage.current{background:color-mix(in srgb,var(--vehicle-color) 14%,white);box-shadow:inset 0 -2px var(--vehicle-color)}.rail-stage{opacity:.85}.turn-complete{background:#29a87b}.turn-running{background:var(--vehicle-color)}.vehicle-turn-progress{height:6px;background:#dae6ef}.show-fleet{border-color:#94c7d7;background:#eefbff;color:#176781}.map-follow{background:#fff2e7;color:#ba4d1a;border-color:#ea995e}.vehicle-trips-head{background:linear-gradient(90deg,color-mix(in srgb,var(--vehicle-color) 9%,white),transparent);padding:12px 10px;border-radius:6px 6px 0 0}.trip{background:#fff;border-color:#d4e1ec}.trip-title{color:#204870}.trip-body{background:#eff6fb}.event{background:#fff;border-color:#d0e2ef}.event.live-event{background:#fff3e7;border-color:#ec9b60}.live-tag{color:#d45e21}.trip-badge{background:#e8f3fa;color:#306380;border-color:#bdd9e8}.section-title{color:#33597b;font-weight:700}.preview-tools{background:#e1edf8;border-color:#9dbbd5}.preview-tools button{background:#f6fbff;border-color:#a9c7db;color:#365e7b}.signalbar.good{--signal:#16a574}.signalbar.warn{--signal:#e29516}.signalbar.bad{--signal:#e64c60}
+html[data-theme="dark"]{--bg:#101c30;--card:#182b45;--border:#304d6e;--text:#eef5ff;--dim:#a4bfda;--green:#ff9c60;--cyan:#47d6e9}
+html[data-theme="dark"] body{background:linear-gradient(135deg,#101c30,#142d43 60%,#252238)}
+html[data-theme="dark"] .monitor-card{border-top-color:#ff9758;box-shadow:0 12px 40px #0004}
+html[data-theme="dark"] .fleet-planner{background:linear-gradient(105deg,#243147,#19384b)}
+html[data-theme="dark"] .fleet-planner-title{color:#edf4ff}
+html[data-theme="dark"] .vehicle-planner{border-color:#355271}
+html[data-theme="dark"] .side{background:linear-gradient(170deg,#203957,#163b48)}
+html[data-theme="dark"] .clock,html[data-theme="dark"] .operation-value,html[data-theme="dark"] .kpi b{color:#e7f3ff}
+html[data-theme="dark"] .status{color:#ffaf77}
+html[data-theme="dark"] .map-clocks small{color:#9fc3df}
+html[data-theme="dark"] .fleet-rail{background:linear-gradient(100deg,color-mix(in srgb,var(--vehicle-color) 14%,#172b44),#192d47)}
+html[data-theme="dark"] .fleet-rail.selected{background:linear-gradient(100deg,color-mix(in srgb,var(--vehicle-color) 23%,#172b44),#1b344d);box-shadow:0 2px 14px color-mix(in srgb,var(--vehicle-color) 15%,transparent)}
+html[data-theme="dark"] .rail-summary b,html[data-theme="dark"] .rail-state,html[data-theme="dark"] .vehicle-planner-line>b,html[data-theme="dark"] .vehicle-trips-head b{color:color-mix(in srgb,var(--vehicle-color) 72%,white)}
+html[data-theme="dark"] .fleet-track,html[data-theme="dark"] .vehicle-turn-progress{background:#355675}
+html[data-theme="dark"] .rail-stage.current{background:color-mix(in srgb,var(--vehicle-color) 20%,#172b44);color:color-mix(in srgb,var(--vehicle-color) 60%,white)}
+html[data-theme="dark"] .show-fleet{background:#154459;border-color:#2e92aa;color:#a4eff8}
+html[data-theme="dark"] .map-follow{background:#422d29;color:#ffc69c;border-color:#de8653}
+html[data-theme="dark"] .map-follow[aria-pressed="false"]{background:#203a54;border-color:#6594bd;color:#bcdcf5}
+html[data-theme="dark"] .map-hint{background:#182f49ed;color:#c9e0f4;border-color:#416384}
+html[data-theme="dark"] .vehicle-trips-head{background:linear-gradient(90deg,color-mix(in srgb,var(--vehicle-color) 17%,#182b45),transparent)}
+html[data-theme="dark"] .trip{background:#1b314d;border-color:#365777}
+html[data-theme="dark"] .trip-title{color:#d2e9ff}
+html[data-theme="dark"] .trip-body{background:#15283e}
+html[data-theme="dark"] .event{background:#1d3652;border-color:#345a7a}
+html[data-theme="dark"] .event.live-event{background:#44332e;border-color:#dc8f58}
+html[data-theme="dark"] .trip-badge{background:#214d61;color:#b5edf5;border-color:#37829a}
+html[data-theme="dark"] .live-tag{color:#ffb77c}
+html[data-theme="dark"] .timeline{border-color:#426887}
+html[data-theme="dark"] .timeline li:before{border-color:#15283e}
+html[data-theme="dark"] .section-title{color:#9ac9ef}
+html[data-theme="dark"] .preview-tools{background:#203754;border-color:#577a9f;color:#bdd7f0}
+html[data-theme="dark"] .preview-tools button{background:#192d46;color:#c0ddf7;border-color:#476e94}
+html[data-theme="dark"] .preview-tools button[aria-pressed="true"]{background:#40302c;color:#ffc9a3;border-color:#e7945d}
+html[data-theme="dark"] .signalbar.good{--signal:#43d6a0}
+html[data-theme="dark"] .signalbar.warn{--signal:#ffc35c}
+html[data-theme="dark"] .signalbar.bad{--signal:#ff7587}
+
+
+/* Center the operational values and replace warm accents with violet / cyan. */
+:root{--green:#7253c3;--cyan:#087f9f}
+.side .map-clocks{text-align:center;gap:10px}.side .map-clocks>div{min-width:0}.side .map-clocks .clock,.side .map-clocks #sync{font-size:23px;font-weight:500;margin-top:7px;line-height:1.3}
+.side .kpi,.side .kpi:nth-child(even){text-align:center;padding:15px 6px}.side .kpi b{font-size:27px;line-height:1.3;margin-bottom:6px}.side .kpi small{display:block;line-height:1.5;font-size:9px;letter-spacing:.25px}.side .operation-box{text-align:center}.side .operation-value{font-size:34px;margin-top:10px}.side .operation-label{font-size:9px;letter-spacing:.65px}.side .operation-sub{margin-top:8px}
+.monitor-card{border-top-color:#9575ed}.fleet-planner{background:linear-gradient(100deg,#f4f0ff,#eafaff)}.status,.journey-current,.live-tag{color:#7253c3}.side{background:linear-gradient(165deg,#f2f3ff,#eaf9fd)}.map-follow{background:#f0ebff;color:#6445b4;border-color:#a795dc}.map-follow[aria-pressed="false"]{background:#eef6fc;color:#437496;border-color:#88b4cf}.event.live-event{background:#f1edff;border-color:#ae98e3}.plant{border-color:#9575ed}.plant-media-card{border-color:#9575ed;box-shadow:0 14px 34px #0005}.markerTruck{border-color:#9575ed}.preview-tools button[aria-pressed="true"]{background:#eee8ff;color:#7050bd;border-color:#a38bda}
+html[data-theme="dark"]{--green:#bfacff;--cyan:#69d9f3}
+html[data-theme="dark"] .monitor-card{border-top-color:#b39afa}
+html[data-theme="dark"] .fleet-planner{background:linear-gradient(105deg,#2b2c51,#183c51)}
+html[data-theme="dark"] .side{background:linear-gradient(165deg,#292e54,#183b51)}
+html[data-theme="dark"] .status,html[data-theme="dark"] .journey-current,html[data-theme="dark"] .live-tag{color:#c4b2ff}
+html[data-theme="dark"] .map-follow{background:#332c55;color:#d5c8ff;border-color:#a78cdd}
+html[data-theme="dark"] .map-follow[aria-pressed="false"]{background:#203a54;color:#bcdcf5;border-color:#6594bd}
+html[data-theme="dark"] .event.live-event{background:#302d50;border-color:#9b84d5}
+html[data-theme="dark"] .plant{border-color:#b39afa;background:#26314bf2;color:#e8e4ff}
+html[data-theme="dark"] .preview-tools button[aria-pressed="true"]{background:#352d55;color:#d5c7ff;border-color:#a890df}
+@media(max-width:650px){.side .kpi,.side .kpi:nth-child(even){padding:10px 4px!important}.side .kpi b{font-size:23px}.side .map-clocks .clock,.side .map-clocks #sync{font-size:22px}.side .operation-value{font-size:30px}}
+
+
+.side-toolbar{flex-wrap:wrap;gap:10px}.appearance-controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.palette-label{display:flex}#paletteSelect{width:auto;max-width:150px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:5px;padding:7px 6px;font-size:10px;cursor:pointer}#paletteSelect:focus-visible{outline:2px solid var(--palette-accent);outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+html[data-palette]{--green:var(--palette-accent-light)}
+html[data-palette] .monitor-card{border-top-color:var(--palette-accent)}
+html[data-palette] .status,html[data-palette] .journey-current,html[data-palette] .live-tag{color:var(--palette-accent-light)}
+html[data-palette] .fleet-planner{background:linear-gradient(100deg,var(--palette-accent-soft),color-mix(in srgb,var(--palette-secondary) 8%,white))}
+html[data-palette] .side{background:linear-gradient(165deg,color-mix(in srgb,var(--palette-accent) 7%,white),color-mix(in srgb,var(--palette-secondary) 8%,white))}
+html[data-palette] .map-follow{background:var(--palette-accent-soft);color:var(--palette-accent-light);border-color:var(--palette-accent)}
+html[data-palette] .event.live-event{background:var(--palette-accent-soft);border-color:var(--palette-accent)}
+html[data-palette] .plant,html[data-palette] .plant-media-card{border-color:var(--palette-accent)}
+html[data-palette] .preview-tools button[aria-pressed="true"]{background:var(--palette-accent-soft);color:var(--palette-accent-light);border-color:var(--palette-accent)}
+html[data-theme="dark"][data-palette]{--green:var(--palette-accent-ink)}
+html[data-theme="dark"][data-palette] .status,html[data-theme="dark"][data-palette] .journey-current,html[data-theme="dark"][data-palette] .live-tag{color:var(--palette-accent-ink)}
+html[data-theme="dark"][data-palette] .fleet-planner{background:linear-gradient(105deg,color-mix(in srgb,var(--palette-accent) 20%,#172b44),color-mix(in srgb,var(--palette-secondary) 20%,#172b44))}
+html[data-theme="dark"][data-palette] .side{background:linear-gradient(165deg,color-mix(in srgb,var(--palette-accent) 20%,#172b44),color-mix(in srgb,var(--palette-secondary) 20%,#172b44))}
+html[data-theme="dark"][data-palette] .map-follow{background:var(--palette-accent-dark);color:var(--palette-accent-ink);border-color:var(--palette-accent)}
+html[data-theme="dark"][data-palette] .event.live-event{background:var(--palette-accent-dark);border-color:var(--palette-accent)}
+html[data-theme="dark"][data-palette] .preview-tools button[aria-pressed="true"]{background:var(--palette-accent-dark);color:var(--palette-accent-ink);border-color:var(--palette-accent)}
+html[data-palette] .map-follow[aria-pressed="false"]{background:var(--card);color:var(--dim);border-color:var(--border)}
+
+
+.legacy-appearance{display:none!important}.theme-picker-label{font-size:10px;color:var(--dim);letter-spacing:0;font-weight:500}#themeSelect{width:auto;max-width:205px;padding:7px 8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:5px;font-size:10px;cursor:pointer}#themeSelect:focus-visible{outline:2px solid var(--palette-accent);outline-offset:2px}.appearance-controls{gap:7px}
+.fleet-planner{padding:9px 20px 6px}.fleet-planner-title{margin-bottom:5px}.vehicle-planner{padding:6px 0}.vehicle-turn-progress{margin-top:5px;height:5px}.vehicle-planner-line{color:var(--text);font-size:11px}.vehicle-projection,.vehicle-rhythm{color:var(--dim)}.overview .routeStrip{padding:7px 20px 8px}.fleet-rails{gap:7px}.fleet-rail{padding:7px 12px}.rail-summary{margin-bottom:11px}.rail-stages{margin-top:9px;gap:5px}.rail-stage{padding:3px 5px;opacity:1;font-size:10px}.rail-stage.pending{color:var(--dim);opacity:.75}.rail-stage.done{color:#167251;background:#dff5eb;font-weight:600}.stage-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;margin-right:2px;font-size:10px}.rail-stage.done .stage-icon{background:#168662;color:#fff}.rail-stage.current{color:var(--palette-accent-light);background:color-mix(in srgb,var(--vehicle-color) 20%,white);border:1px solid var(--vehicle-color);box-shadow:none;font-weight:700}.rail-stage.current .stage-icon{color:var(--vehicle-color);font-size:11px}
+html[data-theme="dark"][data-palette] .rail-stage.done{color:#b6f5d8;background:#1d5148}.rail-stage.done .stage-icon{font-weight:800}html[data-theme="dark"][data-palette] .rail-stage.done .stage-icon{background:#43d9a0;color:#102a23}html[data-theme="dark"][data-palette] .rail-stage.current{background:color-mix(in srgb,var(--vehicle-color) 30%,#172b44);color:color-mix(in srgb,var(--vehicle-color) 45%,white)}
+html[data-palette="mono"] body{background:linear-gradient(135deg,#eeeeee,#fafafa)}html[data-palette="mono"] .side,html[data-palette="mono"] .fleet-planner{background:#f4f4f4}html[data-palette="mono"] .turn-complete{background:#565656}html[data-palette="mono"] .rail-stage.done{background:#e3e3e3;color:#303030}html[data-palette="mono"] .rail-stage.done .stage-icon{background:#444;color:#fff}html[data-palette="mono"] .fleet-plate{color:#fff;background:#444;border-color:var(--vehicle-color);border-left:4px solid var(--vehicle-color)}
+html[data-theme="dark"][data-palette="mono"]{--bg:#171717;--card:#252525;--border:#4c4c4c;--text:#f5f5f5;--dim:#c4c4c4}
+html[data-theme="dark"][data-palette="mono"] body{background:linear-gradient(135deg,#151515,#262626)}html[data-theme="dark"][data-palette="mono"] .side,html[data-theme="dark"][data-palette="mono"] .fleet-planner{background:#2d2d2d}html[data-theme="dark"][data-palette="mono"] .trip,html[data-theme="dark"][data-palette="mono"] .event{background:#303030;border-color:#555}html[data-theme="dark"][data-palette="mono"] .trip-body{background:#202020}html[data-theme="dark"][data-palette="mono"] .trip-badge{background:#404040;border-color:#666;color:#eee}html[data-theme="dark"][data-palette="mono"] .vehicle-turn-progress,html[data-theme="dark"][data-palette="mono"] .fleet-track{background:#505050}html[data-theme="dark"][data-palette="mono"] .turn-complete{background:#dedede}html[data-theme="dark"][data-palette="mono"] .rail-stage.done{background:#444;color:#eee}html[data-theme="dark"][data-palette="mono"] .rail-stage.done .stage-icon{background:#eee;color:#222}
+@media(max-width:650px){.fleet-planner{padding:9px 15px 6px}.overview .routeStrip{padding:7px 15px}.rail-stage{font-size:9px}#themeSelect{max-width:195px}}
+
 </style>
 </head>
 <body>
-<div class="wrap"><div class="top"><div><div class="title">Logística Interplanta</div><div class="muted">🟢 Monitor de Flota en Vivo</div></div><div class="card head" style="display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:center;text-align:center"><div><div class="muted">HORA ACTUAL</div><div id="clock" class="clock">--:--:--</div></div><div><div class="muted">ÚLTIMA SINCRONIZACIÓN</div><div id="sync" style="font-size:16px;font-weight:900;margin-top:4px">--:--:--</div></div></div></div>
-<div class="card"><div class="planner"><div style="display:flex;justify-content:space-between"><b style="color:var(--green)">⏱ PLANIFICADOR DE TURNO (12 HS)</b><b>Viajes programados TMS: <span id="prog">0</span></b></div><div class="progress" style="margin-top:10px"><div id="ok" class="seg-ok"></div><div id="run" class="seg-run"></div><div id="pend" class="seg-pend"></div><span id="barTxt">--</span></div><div class="planner-footer"><div id="ritmoActual" class="rhythm">⏱ Ritmo: -- min / viaje</div><div id="proyeccionTurno" class="projection">Proyección: esperando datos...</div></div></div>
-<div class="routeStrip"><div class="routeLine"><div class="ep">AKZO</div><div class="rail"><div id="remainRail" class="remain"></div><div id="truckRail" class="truck">
+<div class="wrap">
+<div class="preview-tools" id="previewTools"><b>VISTA LOCAL · DATOS DE PRUEBA</b><button id="previewFleetCount" aria-pressed="true">2 camiones</button><button data-preview="route" aria-pressed="true">En ruta</button><button data-preview="carga">Carga AKZO</button><button data-preview="descarga">Descarga SLI</button><button data-preview="delayed">Señal demorada</button><button data-preview="offline">Sin conexión</button><a href="?">Ver datos reales</a></div>
+
+<div class="card monitor-card"><div class="overview"><div class="fleet-planner"><div class="fleet-planner-title">⏱ PLANIFICADOR DE TURNO (12 HS)</div><div id="fleetPlannerRows"></div></div><div class="legacy-panel" hidden><div class="planner"><div style="display:flex;justify-content:space-between"><b style="color:var(--text)">⏱ PLANIFICADOR DE TURNO (12 HS)</b><b>Viajes programados TMS: <span id="prog">0</span></b></div><div class="progress" style="margin-top:10px"><div id="ok" class="seg-ok"></div><div id="run" class="seg-run"></div><div id="pend" class="seg-pend"></div><span id="barTxt">--</span></div><div class="planner-footer"><div id="ritmoActual" class="rhythm">⏱ Ritmo: -- min / viaje</div><div id="proyeccionTurno" class="projection">Proyección: esperando datos...</div></div></div><div class="journey"><div class="journey-head"><span class="journey-title" id="journeyTitle">RECORRIDO DEL VIAJE ACTUAL</span><span class="journey-current" id="journeyCurrent">Esperando operación…</span></div><div class="journey-stages" id="journeyStages"></div></div></div><div class="routeStrip"><div id="fleetRails" class="fleet-rails"></div><div class="routeLine legacy-rail"><div class="ep">AKZO</div><div class="rail"><div id="remainRail" class="remain"></div><div id="truckRail" class="truck">
   <img id="truckRailImg"
        src="https://consultassli.github.io/Playa/assets/camion_barra_hacia_sli.png"
        alt="Camión Grupo SLI">
-</div><div id="truckRailLabel" class="truckLabel">--</div></div><div class="ep">SLI</div></div></div>
-<div class="grid"><div class="side"><div class="muted">ESTADO ACTUAL</div><div id="status" class="status">CARGANDO...</div><div id="sub" class="muted">Esperando JSON</div><div class="kpis"><div class="kpi"><b id="km">-- km</b><small>DISTANCIA RESTANTE</small></div><div class="kpi"><b id="eta">-- min</b><small>ETA</small></div><div class="kpi"><b id="arr">--:--</b><small>LLEGADA ESTIMADA</small></div><div class="kpi"><b id="adv">--%</b><small>AVANCE DE RUTA</small></div></div><div class="operation-time"><div class="operation-box"><div class="operation-label">TIEMPO DE OPERACIÓN</div><div id="tiempoOperacion" class="operation-value">--:--:--</div><div class="operation-sub">Desde 1° Akzo</div></div></div><div class="controls"><div class="muted" style="margin-bottom:6px">SENTIDO PARA PRUEBAS</div><select id="override"><option value="AUTO">AUTO (movimiento GPS)</option><option value="AKZO_SLI">AKZO → SLI</option><option value="SLI_AKZO">SLI → AKZO</option></select><div id="debug" class="debug"></div></div></div><div class="mapwrap"><div id="map" style="position:relative">
+</div><div id="truckRailLabel" class="truckLabel">--</div></div><div class="ep">SLI</div></div></div></div><div class="grid"><div class="side"><div class="side-toolbar"><span id="selectedPlate">SLI ↔ AKZO</span><div class="appearance-controls"><label class="theme-picker-label" for="themeSelect">Temas</label><select id="themeSelect" aria-label="Tema y gama de colores"></select><div hidden class="legacy-appearance"><div class="appearance-controls"><button id="themeToggle" type="button" aria-pressed="false">☾ Tema oscuro</button><label class="palette-label"><span class="sr-only">Paleta de colores</span><select id="paletteSelect" aria-label="Paleta de colores"><option value="violet">Violeta · Celeste</option><option value="ocean">Azul · Turquesa</option><option value="forest">Esmeralda · Azul</option><option value="rose">Rosa · Violeta</option><option value="sunset">Coral · Azul</option></select></label></div></div></div></div><div class="map-clocks"><div><small>HORA ACTUAL</small><div id="clock" class="clock">--:--:--</div></div><div><small>ÚLTIMA SINCRONIZACIÓN</small><div id="sync">--:--:--</div></div></div><div class="muted">ESTADO ACTUAL</div><div id="status" class="status">CARGANDO...</div><div id="sub" class="muted">Esperando JSON</div><div class="kpis"><div class="kpi"><b id="km">-- km</b><small>DISTANCIA RESTANTE</small></div><div class="kpi"><b id="eta">-- min</b><small>ETA</small></div><div class="kpi"><b id="arr">--:--</b><small>LLEGADA ESTIMADA</small></div><div class="kpi"><b id="adv">--%</b><small>AVANCE DE RUTA</small></div></div><div class="operation-time"><div class="operation-box"><div class="operation-label">TIEMPO DE OPERACIÓN</div><div id="tiempoOperacion" class="operation-value">--:--:--</div><div class="operation-sub">Desde 1° Akzo</div></div></div><div class="controls"><div class="muted" style="margin-bottom:6px">SENTIDO PARA PRUEBAS</div><select id="override"><option value="AUTO">AUTO (movimiento GPS)</option><option value="AKZO_SLI">AKZO → SLI</option><option value="SLI_AKZO">SLI → AKZO</option></select><div id="debug" class="debug"></div></div></div><div class="mapwrap"><button id="followTruck" class="map-follow" aria-pressed="true">◎ Siguiendo camión</button><button id="showFleet" class="show-fleet">▣ Ver ambos</button><div class="map-hint" id="mapHint">Mové el mapa para explorar</div><div id="map" style="position:relative">
       <div id="plantMediaWrap" class="plant-media-wrap">
         <div id="plantMediaCard" class="plant-media-card">
           <video id="plantMediaVideo" class="plant-media-video" muted autoplay loop playsinline preload="metadata"></video>
@@ -182,12 +346,103 @@
                alt="Camión Grupo SLI sobre balanza">
           <div id="plantMediaBadge" class="plant-media-badge">OPERACIÓN EN PLANTA</div>
         </div>
-      </div></div><div id="routeBadge" class="badge">esperando ruta</div></div></div></div>
+      </div></div><div id="routeBadge" class="badge">esperando ruta</div><div class="signalbar" id="signalBar" role="status" aria-live="polite"><div><div class="signal-title"><span class="signal-dot"></span><span id="signalTitle">CONECTANDO CON EL SHUTTLE</span></div><div class="signal-detail" id="signalDetail">Esperando primera posición GPS…</div></div><div class="signal-meta"><div id="gpsAge">GPS · —</div><div id="cacheAge">Datos del monitor · —</div></div></div></div></div>
+
+</div>
   <div class="section-title">Viajes del día</div>
   <div id="trips" class="trips"><div class="trip"><div class="trip-head"><div><div class="trip-title">Cargando viajes...</div></div></div></div></div>
 </div>
 <script src="https://unpkg.com/maplibre-gl@5.10.0/dist/maplibre-gl.js"></script>
 <script>
+
+
+function applyTheme(theme){
+  const dark=theme==='dark';
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  const b=document.getElementById('themeToggle');
+  b.textContent=dark?'☀ Tema claro':'☾ Tema oscuro';
+  b.setAttribute('aria-pressed',String(dark));
+  try{localStorage.setItem('interplanta-theme-v2',dark?'dark':'light');}catch(e){}
+}
+let savedTheme='dark';
+try{savedTheme=localStorage.getItem('interplanta-theme-v2')||'dark';}catch(e){}
+applyTheme(savedTheme);
+document.getElementById('themeToggle').addEventListener('click',()=>applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'));
+
+const LOCAL_PREVIEW=new URLSearchParams(location.search).get('demo')==='1';
+let followTruck=true, lastMapDirection=null, currentMapPoint=null, lastPacket=null, lastFetchError=false, loadBusy=false, lastGpsStamp=null, lastCacheStamp=null, previewMode='route';
+const STAGES=[['SLI','📦'],['Ruta a AKZO','↗'],['Entrada AKZO','🏭'],['Balanza','⚖'],['Carga AKZO','🏗'],['Balanza / salida','⚖'],['Ruta a SLI','↘'],['Descarga SLI','📦']];
+function packetTimestamp(value,date){
+  const v=String(value||'').trim();
+  if(!v)return null;
+  let m=v.match(/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}:\d{2}:\d{2})$/);
+  if(m)return Date.parse(`${m[3]}-${m[2]}-${m[1]}T${m[4]}-03:00`);
+  if(/^\d{2}:\d{2}(:\d{2})?$/.test(v)){
+    const day=date||new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    let t=Date.parse(`${day}T${v.length===5?v+':00':v}-03:00`);
+    if(t>Date.now()+60000)t-=86400000;
+    return Number.isFinite(t)?t:null;
+  }
+  const t=Date.parse(v);return Number.isFinite(t)?t:null;
+}
+function ageText(t){if(!Number.isFinite(t))return 'sin hora disponible';const secs=Math.max(0,Math.floor((Date.now()-t)/1000));return secs<60?`hace ${secs} s`:secs<3600?`hace ${Math.floor(secs/60)} min ${secs%60} s`:`hace ${Math.floor(secs/3600)} h ${Math.floor(secs%3600/60)} min`;}
+function updateSignal(){
+  const bar=document.getElementById('signalBar');
+  const gpsAge=lastGpsStamp==null?null:Math.max(0,(Date.now()-lastGpsStamp)/1000);
+  const cacheAge=lastCacheStamp==null?null:Math.max(0,(Date.now()-lastCacheStamp)/1000);
+  let level='warn',title='ESPERANDO DATOS',detail='Todavía no hay una posición con hora verificable.';
+  if(lastFetchError){level='bad';title='SIN CONEXIÓN CON EL MONITOR';detail=lastPacket?'Mostrando la última posición conocida. Reintentando cada 10 s.':'No se pudieron cargar los datos. Reintentando cada 10 s.';}
+  else if(gpsAge!=null&&cacheAge!=null){const age=Math.max(gpsAge,cacheAge);level=age>300?'bad':age>180?'warn':'good';title=level==='good'?'SEGUIMIENTO ACTIVO':level==='warn'?'SEÑAL DEMORADA':'DATOS SIN ACTUALIZAR';detail=level==='good'?'Posición recibida por GPS · actualización de datos aproximada cada minuto.':'Mostrando la última posición conocida; el movimiento actual no está confirmado.';}
+  bar.className='signalbar '+level;
+  document.getElementById('signalTitle').textContent=(LOCAL_PREVIEW?'PRUEBA · ':'')+title;
+  document.getElementById('signalDetail').textContent=detail;
+  document.getElementById('gpsAge').textContent='GPS · '+ageText(lastGpsStamp);
+  document.getElementById('cacheAge').textContent='Datos del monitor · '+ageText(lastCacheStamp);
+}
+function updateJourney(data){
+  const c=(data.camiones||[])[0]||{},state=currentOperationalState(c);
+  const trips=(((LAST_TRIPS_DATA||{}).camiones||[])[0]?.viajes||[]).slice().sort((a,b)=>Number(b.n||b.id||0)-Number(a.n||a.id||0));
+  const v=trips.find(v=>!v.completo&&!v.fin),events=v?.eventos||[];
+  let index=state.kind==='ROUTE'?(state.dir==='AKZO_SLI'?6:1):state.label==='DESCARGA SLI'?7:state.label==='CARGA AKZO'?4:state.label==='BALANZA'?(events.some(e=>normalizeEventName(e.evento||e.movimiento).includes('CARGA AKZO'))?5:3):state.label?.includes('AKZO')?2:0;
+  document.getElementById('journeyTitle').textContent=v?`VIAJE #${v.n||v.id||'—'} · RECORRIDO ACTUAL`:'RECORRIDO OPERATIVO';
+  const e=getLatestOpenEvent();
+  const duration=e?.inicio?fmtDuration(elapsedSecondsLive(e.inicio)):null;
+  document.getElementById('journeyCurrent').textContent=(state.label||'En ruta')+(duration?' · '+duration:'');
+  document.getElementById('journeyStages').innerHTML=STAGES.map(([label,icon],i)=>`<div class="journey-stage ${i===index?'current':v&&i<index?'done':''}" ${i===index?'aria-current="step"':''}><b>${v&&i<index?'✓':icon}</b>${label}</div>`).join('');
+}
+function setFollow(enabled){followTruck=enabled;const b=document.getElementById('followTruck');b.setAttribute('aria-pressed',String(enabled));b.textContent=enabled?(fleetAll?'◎ Vista de flota':'◎ Siguiendo '+vehicleLabel(selectedVehicle())):'◎ Seguir camión';document.getElementById('mapHint').textContent=enabled?'Mové el mapa para explorar':'Vista libre · pulsá Seguir camión para volver';if(enabled&&!fleetAll&&currentMapPoint)map.easeTo({center:currentMapPoint,duration:500});}
+function acceptPacket(packet){
+  lastPacket=packet;lastFetchError=false;lastCacheStamp=packetTimestamp(packet.generado,packet.fecha);
+  render(packet.operacion||{});renderTrips(packet.viajes||{});updateSignal();
+}
+
+function previewPacket(mode){
+  const ago=mode==='delayed'?240:mode==='offline'?420:35;
+  const h=(seconds)=>new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(Date.now()-seconds*1000));
+  const day=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+  const route=ROUTES.AKZO_SLI.c[14];
+  const c={patente:'AG339AG',programadosTms:8,viajesCompletos:3,viajeEnCurso:true,viajeActual:4,lat:route[1],lon:route[0],horaGps:h(ago),fase:'EN_RUTA_A_SLI',sentido:'AKZO_SLI',zona:'Ruta'};
+  let current='En Ruta a SLI';
+  if(mode==='carga'){Object.assign(c,{lat:AKZO.lat,lon:AKZO.lon,fase:'EN_AKZO',sentido:null,zona:'Carga Akzo'});current='Carga Akzo';}
+  if(mode==='descarga'){Object.assign(c,{lat:SLI.lat,lon:SLI.lon,fase:'DESCARGANDO_SLI',sentido:null,zona:'Descarga SLI'});current='Descarga SLI';}
+  const names=mode==='carga'?['Salida SLI','En Ruta a Akzo','Entrada Akzo','Balanza']:['Salida SLI','En Ruta a Akzo','Entrada Akzo','Balanza','Carga Akzo','Balanza','Salida Akzo'];
+  if(mode==='descarga')names.push('En Ruta a SLI','Entrada SLI');
+  const events=names.map((evento,i)=>({evento,inicio:h(4800-i*420),fin:h(4800-(i+1)*420)}));events.push({evento:current,inicio:events.at(-1).fin,fin:null});
+  const viajes=[{n:4,inicio:events[0].inicio,fin:null,completo:false,eventos:events}];
+  const packet={fecha:day,generado:day+'T'+h(ago)+'-03:00',operacion:{actualizado:h(ago),resumen:{viajesProgramadosTms:8,viajesCompletosGps:3,viajesEnCursoGps:1,viajesPendientes:4},camiones:[c]},viajes:{camiones:[{patente:'AG339AG',viajes}]}};
+  if(previewTwo){
+    const q=ROUTES.SLI_AKZO.c[9];
+    packet.operacion.camiones.push({patente:'DEMO-02',programadosTms:4,viajesCompletos:1,viajeEnCurso:true,viajeActual:2,lat:q[1],lon:q[0],horaGps:h(ago),fase:'EN_RUTA_A_AKZO',sentido:'SLI_AKZO',zona:'Ruta'});
+    packet.viajes.camiones.push({patente:'DEMO-02',viajes:[{n:2,inicio:h(1200),completo:false,eventos:[{evento:'Salida SLI',inicio:h(1200),fin:h(950)},{evento:'En Ruta a Akzo',inicio:h(950),fin:null}]}]});
+    packet.operacion.resumen={viajesProgramadosTms:12,viajesCompletosGps:4,viajesEnCursoGps:2,viajesPendientes:6};
+  }
+  return packet;
+}
+function selectPreview(mode){previewMode=mode;document.querySelectorAll('[data-preview]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.preview===mode)));acceptPacket(previewPacket(mode));if(mode==='offline'){lastFetchError=true;updateSignal();}}
+document.getElementById('followTruck').addEventListener('click',()=>{const wasAll=fleetAll;fleetAll=false;setFollow(wasAll?true:!followTruck);document.getElementById('showFleet').setAttribute('aria-pressed','false');});
+if(LOCAL_PREVIEW){document.getElementById('previewTools').classList.add('show');document.querySelectorAll('[data-preview]').forEach(b=>b.addEventListener('click',()=>selectPreview(b.dataset.preview)));}
+setInterval(()=>{updateSignal();if(lastPacket)updateJourney(selectedOperation());},1000);
+
 const API='https://script.google.com/macros/s/AKfycbyH4swHGQjI8ZTK3AqiXM9ztGbiqFTnWOpSYCEK09pXr02FB0KOxLoXbVqtCE7py4lbeg/exec';
 const TRUCK_IMG_HACIA_AKZO='https://consultassli.github.io/Playa/assets/camion_barra_hacia_akzo.png';
 const TRUCK_IMG_HACIA_SLI ='https://consultassli.github.io/Playa/assets/camion_barra_hacia_sli.png';
@@ -372,7 +627,7 @@ function initMap(){
       id:'remainL',
       type:'line',
       source:'remain',
-      paint:{'line-color':'#00e676','line-width':8},
+      paint:{'line-color':FLEET_PALETTE[0],'line-width':8},
       layout:{'line-cap':'round','line-join':'round'}
     });
 
@@ -380,6 +635,9 @@ function initMap(){
     markerPlant('📦 SLI',SLI);
   });
 
+  map.on('dragstart',()=>setFollow(false));
+  map.on('zoomstart',e=>{if(e.originalEvent)setFollow(false);});
+  map.on('rotatestart',e=>{if(e.originalEvent)setFollow(false);});
   map.on('zoom',updatePlantMediaScale);
   map.on('moveend',()=>{
     if(plantMediaMarker && plantMediaTarget){
@@ -574,30 +832,14 @@ function bearingDeg(a,b){
   return (Math.atan2(y,x)*180/Math.PI+360)%360;
 }
 function ensureTruckMarker(lngLat){
-  if(!truckMarker){
-    const e=document.createElement('div');
-    e.className='markerTruck';
-
-    const img=document.createElement('img');
-    img.className='mapTruckImg';
-    img.id='mapTruckImg';
-    img.src=TRUCK_IMG_HACIA_SLI;
-    img.alt='Camión Grupo SLI';
-
-    e.appendChild(img);
-    truckMarker=new maplibregl.Marker({
-      element:e,
-      anchor:'center'
-    }).setLngLat(lngLat).addTo(map);
-  }else{
-    truckMarker.setLngLat(lngLat);
-  }
+  truckMarker=fleetMarkers.get(selectedKey)?.marker||null;
+  if(truckMarker)truckMarker.setLngLat(lngLat);
   return truckMarker;
 }
 
 function setMapTruckDirection(dir){
   if(!truckMarker)return;
-  const img=truckMarker.getElement().querySelector('#mapTruckImg');
+  const img=truckMarker.getElement().querySelector('.mapTruckImg');
   if(!img)return;
   const wanted=truckImageForDirection(dir);
   if(img.src!==wanted) img.src=wanted;
@@ -608,18 +850,18 @@ function setTruckHeadingOnRoute(def,p,dir){
   // El globo queda siempre derecho. Solo cambiamos la vista del camión
   // según el sentido general del viaje.
   setMapTruckDirection(dir);
-  const img=truckMarker.getElement().querySelector('#mapTruckImg');
+  const img=truckMarker.getElement().querySelector('.mapTruckImg');
   if(img) img.style.transform='none';
 }
 
 function resetTruckHeading(dir){
   if(!truckMarker)return;
   setMapTruckDirection(dir);
-  const img=truckMarker.getElement().querySelector('#mapTruckImg');
+  const img=truckMarker.getElement().querySelector('.mapTruckImg');
   if(img) img.style.transform='none';
 }
 
-function render(data){
+function renderSelected(data){
   const r=data.resumen||{}, c=(data.camiones||[])[0]||{};
   if(!Number.isFinite(+c.lat)||!Number.isFinite(+c.lon))return;
 
@@ -663,13 +905,15 @@ function render(data){
     ensureTruckMarker([+c.lon,+c.lat]);
     resetTruckHeading(plantDir);
 
+    currentMapPoint=[+c.lon,+c.lat];
+    lastMapDirection=null;
     const center=atAkzo?[AKZO.lon,AKZO.lat]:[SLI.lon,SLI.lat];
     const plantViewKey=(atAkzo?'AKZO':'SLI')+'|'+state.label;
 
     // Centrar una sola vez cuando cambia el estado/planta.
     // Si el usuario después hace zoom o mueve el mapa, las siguientes
     // actualizaciones del JSON NO le pisan esa vista.
-    if(lastPlantViewKey!==plantViewKey){
+    if(lastPlantViewKey!==plantViewKey && followTruck && !fleetAll){
       lastPlantViewKey=plantViewKey;
       map?.easeTo({center,zoom:14.4,pitch:52,bearing:-20,duration:650});
     }
@@ -710,9 +954,12 @@ function render(data){
     map.getSource('total').setData(routeGeo(def.c));
     map.getSource('remain').setData(routeGeo(p.remainCoords));
     const b=def.c.reduce((bb,q)=>bb.extend(q),new maplibregl.LngLatBounds(def.c[0],def.c[0]));
-    map.fitBounds(b,{padding:45,pitch:52,bearing:-20,duration:500});
+    if(followTruck && !fleetAll && lastMapDirection!==dir){map.fitBounds(b,{padding:65,pitch:52,bearing:-20,duration:500});}
+    else if(followTruck && !fleetAll){map.easeTo({center:[p.lon,p.lat],duration:700});}
+    lastMapDirection=dir;
   }
-  ensureTruckMarker([p.lon,p.lat]);
+  currentMapPoint=[p.lon,p.lat];
+  ensureTruckMarker(currentMapPoint);
   setTruckHeadingOnRoute(def,p,dir);
 
   document.getElementById('routeBadge').textContent=`${def.origen} → ${def.destino} · GPS a ${Math.round(p.off)} m de la traza`;
@@ -723,28 +970,23 @@ function render(data){
 }
 
 async function load(){
-  if(SIM_MODE!=='LIVE')return;
+  if(SIM_MODE!=='LIVE'||loadBusy)return;
+  if(LOCAL_PREVIEW){selectPreview(previewMode);return;}
+  loadBusy=true;
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);
   try{
-    const u=API+'?action=dashboard-json&_='+Date.now();
-    const j=await (await fetch(u,{cache:'no-store'})).json();
-    if(!j.ok) throw Error(j.error||'API cache error');
-
-    const paquete=j.data||{};
-    if(!paquete.operacion) throw Error('JSON cache sin bloque operacion');
-
-    LAST_TRIPS_DATA=paquete.viajes||null;
-    render(paquete.operacion);
-    if(paquete.viajes) renderTrips(paquete.viajes);
-
-    const cacheStamp=paquete.generado||paquete.operacion.actualizado||'';
-    const dbg=document.getElementById('debug');
-    if(dbg && cacheStamp){
-      dbg.textContent += `\nJSON CACHE: ${cacheStamp}`;
-    }
-  }catch(e){
-    document.getElementById('debug').textContent='ERROR CACHE: '+e.message;
-  }
+    const response=await fetch(API+'?action=dashboard-json&_='+Date.now(),{cache:'no-store',signal:controller.signal});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    const j=await response.json();
+    if(!j.ok)throw Error(j.error||'API cache error');
+    const packet=j.data||{};
+    if(!packet.operacion)throw Error('JSON cache sin bloque operacion');
+    if(!(packet.operacion.camiones||[]).some(validPosition))throw Error('JSON sin posición GPS válida');
+    acceptPacket(packet);
+  }catch(e){lastFetchError=true;updateSignal();document.getElementById('debug').textContent='ERROR CACHE: '+e.message;}
+  finally{clearTimeout(timeout);loadBusy=false;}
 }
+
 function secBetween(a,b){if(!a||!b)return null;const pa=String(a).split(':').map(Number),pb=String(b).split(':').map(Number);if(pa.length<2||pb.length<2)return null;let sa=(pa[0]||0)*3600+(pa[1]||0)*60+(pa[2]||0),sb=(pb[0]||0)*3600+(pb[1]||0)*60+(pb[2]||0);if(sb<sa)sb+=86400;return sb-sa}
 function minsBetween(a,b){const s=secBetween(a,b);return s==null?'--':Math.round(s/60)}
 function eventClass(n){
@@ -754,13 +996,13 @@ function eventClass(n){
   return'carga';
 }
 function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function renderTrips(data){
-  const box=document.getElementById('trips');
+function renderTripsSingle(data,targetId="trips",timers=true){
+  const box=document.getElementById(targetId);
   const cam=(data.camiones||[])[0]||{};
   const viajes=(cam.viajes||[]).slice().sort((a,b)=>Number(b.n||b.id||0)-Number(a.n||a.id||0));
 
-  FIRST_AKZO_TIME=firstAkzoTimeFromTrips(data);
-  updateOperationalTimers();
+  if(timers)FIRST_AKZO_TIME=firstAkzoTimeFromTrips(data);
+  if(timers)updateOperationalTimers();
 
   if(!viajes.length){
     box.innerHTML='<div class="trip"><div class="trip-head"><div class="trip-sub">No hay viajes guardados todavía.</div></div></div>';
@@ -811,9 +1053,9 @@ function renderTrips(data){
             }
 
             return `<li class="${eventClass(nom)}">
-              <div class="event">
+              <div class="event ${abierto?'live-event':''}">
                 <div>
-                  <div class="event-name">${esc(nom)}</div>
+                  <div class="event-name">${esc(nom)}${abierto?'<span class="live-tag">EN CURSO</span>':''}</div>
                   <div class="event-time">${textoTiempo}</div>
                 </div>
                 <div class="trip-badge">${badgeEvento}</div>
@@ -825,7 +1067,7 @@ function renderTrips(data){
     </div>`;
   }).join('');
 
-  updateOperationalTimers();
+  if(timers)updateOperationalTimers();
 }
 
 setInterval(()=>{
@@ -834,6 +1076,7 @@ setInterval(()=>{
     hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
   }).format(new Date());
   updateOperationalTimers();
+  if(lastPacket)updateFleetPlannerTimers();
 },1000);
 
 document.getElementById('override').addEventListener('change',()=>{
@@ -842,11 +1085,184 @@ document.getElementById('override').addEventListener('change',()=>{
   load();
 });
 
+
+let selectedKey=null,fleetAll=true,previewTwo=true,lastFleetBounds=null;
+const fleetMarkers=new Map(),fleetColors=new Map();let FLEET_PALETTE=['#9575ed','#10a8cf','#e068a7','#25ad7a'];
+function vehicleKey(c,i=0){return String(c.patente||c.idMovil||('Unidad '+(i+1))).toUpperCase().replace(/[^A-Z0-9]/g,'');}
+function vehicleLabel(c,i=0){return String(c.patente||('Unidad '+(i+1)));}
+function colorFor(c,i){const key=vehicleKey(c,i);if(!fleetColors.has(key))fleetColors.set(key,FLEET_PALETTE[fleetColors.size%FLEET_PALETTE.length]);return fleetColors.get(key);}
+function fleetVehicles(){return lastPacket?.operacion?.camiones||[];}
+function selectedVehicle(){return fleetVehicles().find((c,i)=>vehicleKey(c,i)===selectedKey)||fleetVehicles()[0]||{};}
+function tripsFor(c,i=0){const key=vehicleKey(c,i);return (lastPacket?.viajes?.camiones||[]).find((v,j)=>vehicleKey(v,j)===key)||{patente:vehicleLabel(c,i),viajes:[]};}
+function selectedOperation(){return {...(lastPacket?.operacion||{}),camiones:[selectedVehicle()]};}
+function validPosition(c){return c.lat!=null&&c.lon!=null&&Number.isFinite(+c.lat)&&Number.isFinite(+c.lon);}
+function stateFor(c,i){const saved=LAST_TRIPS_DATA;LAST_TRIPS_DATA={camiones:[tripsFor(c,i)]};const st=currentOperationalState(c);LAST_TRIPS_DATA=saved;return st;}
+function selectVehicle(key){selectedKey=key;lastGps=null;autoDirection=null;lastPlantViewKey=null;lastMapDirection=null;render(lastPacket.operacion);renderTrips(lastPacket.viajes||{});}
+function positionFor(c,i){const st=stateFor(c,i);const dir=st.dir||c.sentido;const def=ROUTES[dir];const p=validPosition(c)&&st.kind==='ROUTE'&&def?project(+c.lat,+c.lon,def.c):null;return {st,dir,p,point:p?[p.lon,p.lat]:[+c.lon,+c.lat]};}
+function updateFleetMarkers(){
+  if(!map)return;
+  const active=new Set();
+  fleetVehicles().forEach((c,i)=>{
+    const key=vehicleKey(c,i);if(!validPosition(c))return;active.add(key);
+    const color=colorFor(c,i),pos=positionFor(c,i);
+    let entry=fleetMarkers.get(key);
+    if(!entry){
+      const el=document.createElement('button');el.type='button';el.className='fleet-marker';
+      el.innerHTML='<span class="fleet-truck"><img class="mapTruckImg" alt="Camión"></span><span class="fleet-plate"></span>';
+      el.style.setProperty('--vehicle-color',color);el.setAttribute('aria-label','Ver '+vehicleLabel(c,i));
+      el.querySelector('.fleet-plate').textContent=vehicleLabel(c,i);
+      el.addEventListener('click',()=>selectVehicle(key));
+      entry={el,marker:new maplibregl.Marker({element:el,anchor:'bottom',offset:[i*12,0]}).setLngLat(pos.point).addTo(map)};fleetMarkers.set(key,entry);
+    }
+    entry.marker.setLngLat(pos.point);entry.el.classList.toggle('selected',key===selectedKey);
+    entry.el.querySelector('.mapTruckImg').src=truckImageForDirection(pos.dir|| (pos.st.label?.includes('AKZO')?'AKZO_SLI':'SLI_AKZO'));
+  });
+  for(const [key,entry] of fleetMarkers){if(!active.has(key)){entry.marker.remove();fleetMarkers.delete(key);}}
+}
+function fitFleet(force=false){
+  if(!map||!fleetAll||!followTruck)return;
+  const points=fleetVehicles().filter(validPosition).map(c=>[+c.lon,+c.lat]);if(!points.length)return;
+  const stamp=points.map(p=>p.map(n=>n.toFixed(4)).join(',')).join('|');
+  if(!force&&stamp===lastFleetBounds)return;lastFleetBounds=stamp;
+  const b=points.reduce((bb,p)=>bb.extend(p),new maplibregl.LngLatBounds(points[0],points[0]));
+  map.fitBounds(b,{padding:80,maxZoom:14.3,pitch:45,bearing:-20,duration:650});
+}
+function renderFleetRails(){
+  const vehicles=fleetVehicles(),box=document.getElementById('fleetRails');
+  box.innerHTML=vehicles.map((c,i)=>{
+    const key=vehicleKey(c,i),color=colorFor(c,i),{st,dir,p}=positionFor(c,i);
+    let x=st.kind==='PLANT'?(st.label?.includes('AKZO')||st.label==='BALANZA'?0:100):p?(dir==='AKZO_SLI'?p.walk/p.total*100:100-p.walk/p.total*100):50;
+    x=Math.max(5,Math.min(95,x));const trip=tripsFor(c,i).viajes?.find(v=>!v.completo&&!v.fin);
+    const events=trip?.eventos||[];
+    const stage=st.kind==='ROUTE'?(dir==='AKZO_SLI'?6:1):st.label==='DESCARGA SLI'?7:st.label==='CARGA AKZO'?4:st.label==='BALANZA'?(events.some(e=>normalizeEventName(e.evento||e.movimiento).includes('CARGA AKZO'))?5:3):st.label?.includes('AKZO')?2:0;
+    const tripNumber=trip?.n||trip?.id||c.viajeActual;
+    const done=completedStageIndices(events);
+    const stageHtml=STAGES.map(([label,icon],j)=>{const finished=done.has(j)&&j!==stage;return `<span class="rail-stage ${j===stage?'current':finished?'done':'pending'}" ${j===stage?'aria-current="step"':''} title="${esc(label)} · ${j===stage?'En curso':finished?'Completado':'Sin completar'}"><span class="stage-icon">${j===stage?'●':finished?'✓':'○'}</span> ${esc(label)}</span>`;}).join('');
+    const open=events.findLast(e=>e.inicio&&!e.fin);
+
+    return `<button class="fleet-rail ${key===selectedKey?'selected':''}" data-vehicle="${esc(key)}" style="--vehicle-color:${color}" aria-pressed="${key===selectedKey}"><span class="rail-summary"><b>${esc(vehicleLabel(c,i))}</b><span class="rail-trip-title">${tripNumber?'VIAJE #'+esc(tripNumber)+' · RECORRIDO ACTUAL':'RECORRIDO OPERATIVO'}</span><span class="rail-state">${esc(st.label||'Sin estado')}${open?'<span data-live-start="'+esc(open.inicio)+'" data-live-unit=" min">—</span>':''}</span><small>GPS ${esc(c.horaGps||'sin hora')}</small></span><span class="fleet-route"><span>AKZO</span><span class="fleet-track"><span class="fleet-progress" style="left:${dir==='AKZO_SLI'?x:0}%;width:${dir==='AKZO_SLI'?100-x:x}%"></span><img class="rail-truck" style="left:${x}%" src="${truckImageForDirection(dir||'AKZO_SLI')}" alt="${esc(vehicleLabel(c,i))}"></span><span>SLI</span></span><span class="rail-stages">${stageHtml}</span></button>`;
+  }).join('');
+  box.querySelectorAll('[data-vehicle]').forEach(b=>b.addEventListener('click',()=>selectVehicle(b.dataset.vehicle)));
+}
+function render(data){
+  const vehicles=data.camiones||[];if(!vehicles.length)return;
+  if(!vehicles.some((c,i)=>vehicleKey(c,i)===selectedKey))selectedKey=vehicleKey(vehicles[0],0);
+  const c=selectedVehicle(),index=vehicles.indexOf(c);
+  LAST_TRIPS_DATA={camiones:[tripsFor(c,index)]};
+  lastGpsStamp=packetTimestamp(c.horaGps,lastPacket?.fecha);
+  document.getElementById('selectedPlate').textContent=vehicleLabel(c,index);
+  document.getElementById('selectedPlate').style.color=colorFor(c,index);
+  updateFleetMarkers();renderSelected({...data,camiones:[c]});
+  FIRST_AKZO_TIME=firstAkzoTimeFromTrips(LAST_TRIPS_DATA);
+  updateJourney({...data,camiones:[c]});renderFleetRails();renderFleetPlanner();fitFleet();
+  document.getElementById('showFleet').textContent=vehicles.length>1?'▣ Ver ambos':'▣ Ver camión';
+  document.getElementById('showFleet').setAttribute('aria-pressed',String(fleetAll));updateSignal();
+}
+function renderTrips(data){
+  const box=document.getElementById('trips'),vehicles=fleetVehicles();
+  box.className='trips fleet-trips'+(vehicles.length>1?' multiple':'');
+  box.innerHTML=vehicles.map((c,i)=>`<section class="vehicle-trips" style="--vehicle-color:${colorFor(c,i)}"><div class="vehicle-trips-head"><span class="vehicle-dot"></span><b>${esc(vehicleLabel(c,i))}</b><span>Viajes del día</span></div><div id="vehicleTrips${i}"></div></section>`).join('');
+  vehicles.forEach((c,i)=>renderTripsSingle({camiones:[tripsFor(c,i)]},'vehicleTrips'+i,false));
+  FIRST_AKZO_TIME=firstAkzoTimeFromTrips(LAST_TRIPS_DATA);updateOperationalTimers();
+}
+document.getElementById('showFleet').addEventListener('click',()=>{fleetAll=true;setFollow(true);fitFleet(true);document.getElementById('showFleet').setAttribute('aria-pressed','true');});
+document.getElementById('previewFleetCount').addEventListener('click',()=>{previewTwo=!previewTwo;document.getElementById('previewFleetCount').textContent=previewTwo?'2 camiones':'1 camión';document.getElementById('previewFleetCount').setAttribute('aria-pressed',String(previewTwo));selectPreview(previewMode);});
+
+
+function vehicleMetrics(c,i){
+  const tc=tripsFor(c,i),trips=tc.viajes||[];
+  const programmed=Number.isFinite(Number(c.programadosTms))&&c.programadosTms!=null?Math.max(0,Number(c.programadosTms)):tc.programadosTms!=null?Math.max(0,Number(tc.programadosTms)):null;
+  const complete=c.viajesCompletos!=null?Math.max(0,Number(c.viajesCompletos)||0):trips.filter(v=>v.completo||v.fin).length;
+  const running=c.viajeEnCurso!=null?(c.viajeEnCurso?1:0):trips.filter(v=>!v.completo&&!v.fin&&v.inicio).length;
+  const pending=programmed==null?null:Math.max(0,programmed-complete-running);
+  const start=firstAkzoTimeFromTrips({camiones:[tc]}),elapsed=start?elapsedSecondsLive(start):null;
+  const rhythm=elapsed!=null&&complete+running>0?Math.max(1,Math.round(elapsed/60/(complete+running))):null;
+  const projected=programmed!=null&&rhythm!=null?programmed*rhythm:null;
+  return {programmed,complete,running,pending,rhythm,projected};
+}
+function renderFleetPlanner(){
+  const box=document.getElementById('fleetPlannerRows');
+  box.innerHTML=fleetVehicles().map((c,i)=>{
+    const m=vehicleMetrics(c,i),total=Math.max(m.programmed||0,m.complete+m.running,1),color=colorFor(c,i);
+    return `<section class="vehicle-planner" style="--vehicle-color:${color}" data-planner="${esc(vehicleKey(c,i))}"><div class="vehicle-planner-line"><b>${esc(vehicleLabel(c,i))}</b><span>TMS <strong>${m.programmed??'—'}</strong></span><span><strong>${m.complete}</strong> completos</span><span><strong>${m.running}</strong> en curso</span><span><strong>${m.pending??'—'}</strong> pendientes</span><span class="vehicle-rhythm" id="fleetRhythm${i}"></span><span class="vehicle-projection" id="fleetProjection${i}"></span></div><div class="vehicle-turn-progress" aria-label="Progreso del turno de ${esc(vehicleLabel(c,i))}"><span class="turn-complete" style="width:${Math.min(100,m.complete/total*100)}%"></span><span class="turn-running" style="width:${Math.min(100,m.running/total*100)}%"></span></div></section>`;
+  }).join('');
+  updateFleetPlannerTimers();
+}
+function updateFleetPlannerTimers(){
+  fleetVehicles().forEach((c,i)=>{
+    const m=vehicleMetrics(c,i),r=document.getElementById('fleetRhythm'+i),p=document.getElementById('fleetProjection'+i);
+    if(r)r.textContent='Ritmo: '+(m.rhythm==null?'—':m.rhythm+' min/viaje');
+    if(p){p.classList.toggle('warn',m.projected!=null&&m.projected>720);p.textContent=m.projected==null?'Proyección: esperando datos':m.programmed===0?'Sin viajes programados':`Proyección estimada: ${fmtHM(m.projected)} / 12 h`;}
+  });
+}
+
+
+const USER_PALETTES={
+  violet:{colors:['#9575ed','#10a8cf','#e068a7','#25ad7a'],light:'#7253c3',soft:'#f0ebff',dark:'#332c55',ink:'#d5c8ff'},
+  ocean:{colors:['#438de8','#13b8ae','#a078e8','#e06caa'],light:'#2469b5',soft:'#e8f3ff',dark:'#203958',ink:'#b5d9ff'},
+  forest:{colors:['#25ad7a','#548fe8','#b586e8','#e573a4'],light:'#168158',soft:'#e5f8ef',dark:'#1d4038',ink:'#a5efd0'},
+  rose:{colors:['#df70a9','#9476ed','#16afc3','#55b586'],light:'#b13e7d',soft:'#ffecf6',dark:'#492e46',ink:'#ffc0e2'},
+  sunset:{colors:['#ec7971','#42a5d6','#a17ee8','#43b99c'],light:'#b94c46',soft:'#fff0ed',dark:'#493333',ink:'#ffc8c1'},
+  royal:{colors:['#7679ee','#e17ccb','#27b8c2','#63bd87'],light:'#5056b5',soft:'#efefff',dark:'#2e3156',ink:'#c8caff'},
+  emerald:{colors:['#1da995','#82a3ee','#dd7eae','#d5b75c'],light:'#087c6d',soft:'#e4faf4',dark:'#19443f',ink:'#a1f0dc'},
+  cherry:{colors:['#e75c7c','#56b6dd','#af82ed','#60c49e'],light:'#b93155',soft:'#ffedf2',dark:'#4d2938',ink:'#ffc0d2'},
+  gold:{colors:['#cda23b','#578fd8','#ba80da','#33b4aa'],light:'#8b6716',soft:'#fff6da',dark:'#433b25',ink:'#f8dfa0'},
+  lime:{colors:['#88b736','#a287ef','#29b7cd','#e8859c'],light:'#577a14',soft:'#f1f9dd',dark:'#324326',ink:'#d3ec9b'},
+  ice:{colors:['#389ebd','#858fdb','#e77fac','#56c1a0'],light:'#1c7490',soft:'#e7f8ff',dark:'#1e3f51',ink:'#b7eafd'},
+  mono:{colors:['#747474','#ababab','#535353','#c8c8c8'],light:'#393939',soft:'#f0f0f0',dark:'#333333',ink:'#eeeeee'}
+};
+function applyPalette(name){
+  if(!USER_PALETTES[name])name='violet';
+  const palette=USER_PALETTES[name],root=document.documentElement;
+  root.setAttribute('data-palette',name);
+  for(const [key,value] of Object.entries({accent:palette.colors[0],secondary:palette.colors[1],'accent-light':palette.light,'accent-soft':palette.soft,'accent-dark':palette.dark,'accent-ink':palette.ink}))root.style.setProperty('--palette-'+key,value);
+  FLEET_PALETTE=palette.colors;fleetColors.clear();
+  fleetVehicles().forEach((c,i)=>{const color=colorFor(c,i),entry=fleetMarkers.get(vehicleKey(c,i));if(entry)entry.el.style.setProperty('--vehicle-color',color);});
+  document.getElementById('paletteSelect').value=name;
+  try{localStorage.setItem('interplanta-palette',name);}catch(e){}
+  if(typeof map!=='undefined'&&map?.getLayer('remainL'))map.setPaintProperty('remainL','line-color',palette.colors[0]);
+  if(lastPacket){render(lastPacket.operacion);renderTrips(lastPacket.viajes||{});}
+}
+let savedPalette='violet';try{savedPalette=localStorage.getItem('interplanta-palette')||'violet';}catch(e){}
+applyPalette(savedPalette);
+document.getElementById('paletteSelect').addEventListener('change',e=>applyPalette(e.target.value));
+
+
+const THEME_NAMES={violet:'Violeta · Celeste',ocean:'Azul · Turquesa',forest:'Esmeralda · Azul',rose:'Rosa · Violeta',sunset:'Coral · Azul',royal:'Índigo · Fucsia',emerald:'Jade · Lavanda',cherry:'Cereza · Cielo',gold:'Dorado · Zafiro',lime:'Lima · Amatista',ice:'Hielo · Azul',mono:'Blanco y negro'};
+const themePicker=document.getElementById('themeSelect');
+themePicker.innerHTML=['dark','light'].map(mode=>`<optgroup label="${mode==='dark'?'Temas oscuros':'Temas claros'}">${Object.entries(THEME_NAMES).map(([key,label])=>`<option value="${mode}:${key}">${mode==='dark'?'Oscuro':'Claro'} · ${label}</option>`).join('')}</optgroup>`).join('');
+function applyUserTheme(value){
+  let [mode,palette]=String(value||'').split(':');
+  if(!['dark','light'].includes(mode)||!USER_PALETTES[palette]){mode='dark';palette='violet';}
+  applyTheme(mode);applyPalette(palette);themePicker.value=mode+':'+palette;
+  try{localStorage.setItem('interplanta-user-theme',themePicker.value);}catch(e){}
+}
+let userTheme=savedTheme+':'+savedPalette;
+try{userTheme=localStorage.getItem('interplanta-user-theme')||userTheme;}catch(e){}
+applyUserTheme(userTheme);
+themePicker.addEventListener('change',e=>applyUserTheme(e.target.value));
+function completedStageIndices(events){
+  const done=new Set();let seenCargo=false;
+  for(const e of events){
+    const n=normalizeEventName(e.evento||e.movimiento);let index=null;
+    if(n.includes('CARGA AKZO')){index=4;seenCargo=true;}
+    else if(n.includes('DESCARGA SLI'))index=7;
+    else if(n.includes('BALANZA'))index=seenCargo?5:3;
+    else if(n.includes('SALIDA AKZO'))index=5;
+    else if(n.includes('RUTA')&&n.includes('AKZO'))index=1;
+    else if(n.includes('RUTA')&&n.includes('SLI'))index=6;
+    else if((n.includes('ENTRADA')||n.includes('PUERTA')||n==='EN AKZO')&&n.includes('AKZO'))index=2;
+    else if(n.includes('SALIDA SLI'))index=0;
+    if(index!=null&&e.fin)done.add(index);
+  }
+  return done;
+}
+
 window.onload=()=>{
   initMap();
-  load();
+  map.once('load',load);
   updateOperationalTimers();
-  setInterval(load,10000);
+  setInterval(()=>{if(map?.isStyleLoaded())load();},10000);
 };
 </script>
 </body></html>
